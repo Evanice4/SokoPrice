@@ -1416,7 +1416,7 @@ function ChatWidget(){
     loadUnread();
     const iv=setInterval(loadUnread,5000);
     return ()=>clearInterval(iv);
-  },[user]);
+  },[user,loadUnread]);
 
   // Message polling: 1.5s when in chat view
   useEffect(()=>{
