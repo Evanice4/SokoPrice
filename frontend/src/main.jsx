@@ -4,7 +4,7 @@ import{Bell,CheckCircle,Eye,EyeOff,LineChart,LogIn,LogOut,MapPin,Pencil,Plus,Shi
 import{Bar,BarChart,Cell,Line,LineChart as RLineChart,Pie,PieChart,ResponsiveContainer,Tooltip,XAxis,YAxis}from'recharts';
 import'./styles.css';
 
-const API=import.meta.env.VITE_API_URL||'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const MARKETS=['Kimironko','Nyabugogo','Kicukiro','Kimisagara','Kigali City'];
 const COMMODITIES=['Maize','Maize Flour','Potatoes','Rice','Beans (Dry)','Sorghum','Bananas','Spinach','Cabbage','Flour'];
 const MARKET_COORDS={'Kimironko':{lat:-1.9441,lon:30.1074},'Nyabugogo':{lat:-1.9359,lon:30.0547},'Kicukiro':{lat:-1.9706,lon:30.0878},'Kimisagara':{lat:-1.9592,lon:30.0442},'Kigali City':{lat:-1.9500,lon:30.0619}};
@@ -33,11 +33,11 @@ const distTo=(m,u)=>u&&MARKET_COORDS[m]?haversine(u.lat,u.lon,MARKET_COORDS[m].l
 function useApi(){
   const tok=()=>localStorage.getItem('sp_token');
   const h=()=>({'Content-Type':'application/json','Authorization':`Bearer ${tok()}`});
-  const post=async(p,b)=>{try{const r=await fetch(API+p,{method:'POST',headers:h(),body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
-  const get=async p=>{try{const r=await fetch(API+p,{headers:h()});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
-  const put=async(p,b)=>{try{const r=await fetch(API+p,{method:'PUT',headers:h(),body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
-  const del=async p=>{try{const r=await fetch(API+p,{method:'DELETE',headers:h()});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
-  const upl=async(p,fd)=>{try{const r=await fetch(API+p,{method:'POST',headers:{'Authorization':`Bearer ${tok()}`},body:fd});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
+  const post=async(p,b)=>{try{const r=await fetch(API_BASE+p,{method:'POST',headers:h(),body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
+  const get=async p=>{try{const r=await fetch(API_BASE+p,{headers:h()});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
+  const put=async(p,b)=>{try{const r=await fetch(API_BASE+p,{method:'PUT',headers:h(),body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
+  const del=async p=>{try{const r=await fetch(API_BASE+p,{method:'DELETE',headers:h()});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
+  const upl=async(p,fd)=>{try{const r=await fetch(API_BASE+p,{method:'POST',headers:{'Authorization':`Bearer ${tok()}`},body:fd});const d=await r.json();if(!r.ok)throw d;return d;}catch{return null;}};
   return{post,get,put,del,upl};
 }
 
@@ -1062,7 +1062,8 @@ function Admin(){
     setRetraining(true);setRetrainError('');setRetrainResult(null);
     try{
       const tok=localStorage.getItem('sp_token');
-      const r=await fetch(API+'/admin/retrain',{method:'POST',headers:{'Authorization':`Bearer ${tok}`}});
+      const r=await fetch(API_BASE+'/admin/retrain',{method:'POST',headers:{'Authorization':`Bearer ${tok}`}});
+
       const d=await r.json();
       if(!r.ok){setRetrainError(d.detail||'Retraining failed');}
       else{setRetrainResult(d);}
@@ -1334,7 +1335,7 @@ function ChatWidget(){
     setSending(true);setSendErr('');
     const token=localStorage.getItem('sp_token');
     try{
-      const res=await fetch(API+'/messages/send',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({receiver_id:partner.partner_id,message:text.trim()})});
+      const res=await fetch(API_BASE+'/messages/send',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({receiver_id:partner.partner_id,message:text.trim()})});
       const data=await res.json();
       if(!res.ok){setSendErr('Failed: '+(data.detail||res.status));}
       else{setMessages(m=>[...m,{...data,sender_name:user.name}]);setText('');inputRef.current?.focus();}
@@ -1527,7 +1528,7 @@ function App(){
       if(idx===-1)return;
       const email=dec.slice(0,idx),pw=dec.slice(idx+1);
       setAutoLogging(true);
-      fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})})
+      fetch(API_BASE+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})})
         .then(r=>r.json()).then(r=>{
           if(!r.token){setAutoLogging(false);setAutoLoginFailed(true);return;}
           localStorage.setItem('sp_token',r.token);
