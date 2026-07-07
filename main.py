@@ -651,11 +651,20 @@ def mark_read(message_id: int,
 
 
 @app.get("/messages/unread-count", tags=["Messages"])
-def unread_count(current_user: dict = Depends(get_current_user)):
-    """Get total unread message count for badge display."""
+def unread_count(
+    partner_id: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get total unread message count for badge display.
+
+    `partner_id` is accepted for backward/forward compatibility with any
+    frontend variants that may pass it as a query parameter.
+    """
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
+
     conn = get_db()
+    # Total unread messages for the logged-in user
     row = conn.execute(
         "SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0",
         (current_user["user_id"],)
