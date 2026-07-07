@@ -1373,7 +1373,12 @@ function ChatWidget(){
     if(d){setConvs(d.conversations||[]);setUnreadTotal(d.conversations?.reduce((s,c)=>s+(c.unread||0),0)||0);}
   };
 
-  const loadUnread=async()=>{const d=await get('/messages/unread-count');if(d)setUnreadTotal(d.count||0);};
+  const loadUnread=async()=>{
+    const tok=localStorage.getItem('sp_token');
+    if(!tok)return;
+    const d=await get('/messages/unread-count');
+    if(d)setUnreadTotal(d.count||0);
+  };
 
   const openChat=async(p)=>{
     setPartner(p);setView('chat');setSendErr('');
@@ -1404,8 +1409,14 @@ function ChatWidget(){
   // Conversations polling while open
   useEffect(()=>{if(open&&user){loadConversations();const iv=setInterval(loadConversations,3000);return ()=>clearInterval(iv);}},[open,user]);
 
-  // Unread count polling always
-  useEffect(()=>{if(!user)return;loadUnread();const iv=setInterval(loadUnread,5000);return ()=>clearInterval(iv);},[user]);
+  // Unread count polling only when authenticated (token must exist)
+  useEffect(()=>{
+    const tok=localStorage.getItem('sp_token');
+    if(!user||!tok)return;
+    loadUnread();
+    const iv=setInterval(loadUnread,5000);
+    return ()=>clearInterval(iv);
+  },[user]);
 
   // Message polling: 1.5s when in chat view
   useEffect(()=>{
