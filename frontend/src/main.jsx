@@ -5,17 +5,17 @@ import{Bar,BarChart,Cell,Line,LineChart as RLineChart,Pie,PieChart,ResponsiveCon
 import'./styles.css';
 
 const API=import.meta.env.VITE_API_URL||'http://localhost:8000';
-const MARKETS=['Kimironko','Nyabugogo','Kicukiro','Kimisagara','Kigali City Market'];
+const MARKETS=['Kimironko','Nyabugogo','Kicukiro','Kimisagara','Kigali City'];
 const COMMODITIES=['Maize','Maize Flour','Potatoes','Rice','Beans (Dry)','Sorghum','Bananas','Spinach','Cabbage','Flour'];
-const MARKET_COORDS={'Kimironko':{lat:-1.9441,lon:30.1074},'Nyabugogo':{lat:-1.9359,lon:30.0547},'Kicukiro':{lat:-1.9706,lon:30.0878},'Kimisagara':{lat:-1.9592,lon:30.0442},'Kigali City Market':{lat:-1.9500,lon:30.0619}};
+const MARKET_COORDS={'Kimironko':{lat:-1.9441,lon:30.1074},'Nyabugogo':{lat:-1.9359,lon:30.0547},'Kicukiro':{lat:-1.9706,lon:30.0878},'Kimisagara':{lat:-1.9592,lon:30.0442},'Kigali City':{lat:-1.9500,lon:30.0619}};
 
 // African market and produce images
 const MARKET_IMAGES={
   'Kimironko':'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80',
   'Nyabugogo':'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&q=80',
-  'Kicukiro':'https://images.unsplash.com/photo-1505935428862-770b6f24f629?w=600&q=80',
+  'Kicukiro':'/kicukiro.jpeg',
   'Kimisagara':'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80',
-  'Kigali City Market':'https://images.unsplash.com/photo-1567529684892-09290a1b2d05?w=600&q=80',
+  'Kigali City':'/kigali.png.jpeg',
 };
 
 const PALETTE=['#087a3a','#ff6b00','#d7b84a','#845ec2','#6c9a36','#e74c3c','#3498db'];
@@ -106,7 +106,7 @@ function TrendBadge({trend}){
 function Spinner(){return <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:48}}><div style={{width:34,height:34,border:'3px solid #e5e9ef',borderTopColor:'#087a3a',borderRadius:'50%',animation:'sp 1s linear infinite'}}/><style>{`@keyframes sp{to{transform:rotate(360deg)}}`}</style></div>;}
 function HeroImg(){
   return(
-    <div style={{borderRadius:16,overflow:'hidden',position:'relative',minHeight:280,background:'linear-gradient(135deg,#0a5c2b,#0d8a3e)'}}>
+    <div className="hero-img" style={{borderRadius:16,overflow:'hidden',position:'relative',background:'linear-gradient(135deg,#0a5c2b,#0d8a3e)'}}>
       <div style={{position:'absolute',inset:0,background:'url(https://images.unsplash.com/photo-1542838132-92c53300491e?w=700&q=80) center/cover',opacity:.22}}/>
       <div style={{position:'absolute',bottom:24,left:24,color:'white'}}>
         <div style={{fontWeight:800,fontSize:22}}>Kigali Markets</div>
@@ -119,17 +119,26 @@ function HeroImg(){
 // Layout
 function Layout({page,setPage,children}){
   const{user,logout}=useAuth();
-  const nav=['Home','Pricing','Markets','Cost Estimator','Sellers','Alerts','About'];
+  const navLabels={Sellers:'Set Prices'};
+  const nav=user?.role==='seller'
+    ?['Home','Sellers','Pricing','Markets','Cost Estimator','Alerts','About']
+    :['Home','Pricing','Markets','Cost Estimator','Alerts','About'];
+  const isAdminPage=page==='Admin';
+  const[mobileNav,setMobileNav]=useState(false);
+  const goTo=p=>{setPage(p);setMobileNav(false);};
   return(
     <>
-      <div className="top" style={{backdropFilter:'blur(12px)',background:'rgba(255,255,255,.96)',boxShadow:'0 1px 0 #e5e9ef'}}>
-        <div style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}} onClick={()=>setPage('Home')}>
-          {/* Logo placeholder */}
-          <div style={{width:36,height:36,background:'#f4fbf6',border:'2px dashed #c3e6cb',borderRadius:8,display:'grid',placeItems:'center',fontSize:11,color:'#aaa'}}></div>
-          <span style={{background:'linear-gradient(135deg,#087a3a,#0aab50)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',fontWeight:800,fontSize:24}}>SokoPrice</span>
+      <div className="top">
+        <div className="brand-logo" onClick={()=>setPage('Home')}>
+          <img src="/sokopricelogo.png" alt="SokoPrice" className="brand-img"/>
+          <span className="brand-text">SokoPrice</span>
         </div>
-        <nav>{nav.map(n=><button key={n} className={page===n?'active':''} onClick={()=>setPage(n)} style={{fontSize:13.5}}>{n}</button>)}</nav>
+        {!isAdminPage&&<nav>{nav.map(n=><button key={n} className={page===n?'active':''} onClick={()=>setPage(n)} style={{fontSize:13.5}}>{navLabels[n]||n}</button>)}</nav>}
         <div className="right" style={{gap:10}}>
+          {/* Hamburger — visible only on mobile, before auth buttons */}
+          {!isAdminPage&&<button className={`hamburger${mobileNav?' open':''}`} onClick={()=>setMobileNav(!mobileNav)} aria-label="Toggle menu"><span/><span/><span/></button>}
+          {/* Desktop-only: user badge + logout */}
+          <div className="desktop-auth" style={{display:'flex',alignItems:'center',gap:10}}>
           {user?(
             <>
               <div onClick={()=>setPage(user.role==='admin'?'Admin':user.role==='seller'?'Sellers':'Home')}
@@ -145,15 +154,39 @@ function Layout({page,setPage,children}){
               <button className="primary" onClick={()=>setPage('Register')} style={{padding:'10px 20px',fontSize:13.5}}><User size={15}/> Get Started</button>
             </>
           )}
+          </div>
         </div>
       </div>
-      <div style={{minHeight:'calc(100vh - 70px)'}}>{children}</div>
-      <footer style={{background:'linear-gradient(135deg,#0a3d1f,#0d5c2e)',color:'white',padding:'18px 9%',display:'flex',alignItems:'center',justifyContent:'flex-end'}}>
+      {/* Mobile nav drawer: page links + user section + logout */}
+      {!isAdminPage&&(
+        <div className={`mobile-nav${mobileNav?' open':''}`}>
+          {user&&(
+            <div className="mobile-nav-user">
+              <div className="mobile-nav-avatar">{user.name[0].toUpperCase()}</div>
+              <div>
+                <div className="mobile-nav-name">{user.name}</div>
+                <div className="mobile-nav-role">{user.role}</div>
+              </div>
+            </div>
+          )}
+          {nav.map(n=><button key={n} className={page===n?'active':''} onClick={()=>goTo(n)}>{navLabels[n]||n}</button>)}
+          {user?(
+            <button className="mobile-nav-logout" onClick={()=>{logout();setMobileNav(false);}}><LogOut size={18}/> Logout</button>
+          ):(
+            <div className="mobile-nav-auth">
+              <button className="primary" onClick={()=>goTo('Login')} style={{width:'100%',marginBottom:8}}><LogIn size={16}/> Sign In</button>
+              <button className="ghost" onClick={()=>goTo('Register')} style={{width:'100%'}}><User size={16}/> Get Started</button>
+            </div>
+          )}
+        </div>
+      )}
+      <div style={{minHeight:isAdminPage?'100vh':'calc(100vh - 70px)'}}>{children}</div>
+      {!isAdminPage&&<footer style={{background:'linear-gradient(135deg,#0a3d1f,#0d5c2e)',color:'white',padding:'18px 9%',display:'flex',alignItems:'center',justifyContent:'flex-end'}}>
         <div style={{display:'flex',alignItems:'center',gap:8,color:'rgba(255,255,255,.5)',fontSize:13}}>
           <span style={{width:22,height:22,border:'1.5px solid rgba(255,255,255,.4)',borderRadius:'50%',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:11}}>©</span>
           2026 SokoPrice
         </div>
-      </footer>
+      </footer>}
     </>
   );
 }
@@ -169,12 +202,14 @@ function Login({setPage}){
     const r=await post('/auth/login',{email,password:pw});
     setLoading(false);
     if(!r){setErr('Invalid email or password');return;}
-    localStorage.setItem('sp_token',r.token);localStorage.setItem('sp_user',JSON.stringify(r.user));setUser(r.user);
+    localStorage.setItem('sp_token',r.token);localStorage.setItem('sp_user',JSON.stringify(r.user));
+    localStorage.setItem('sp_creds',btoa(email+':'+pw));setUser(r.user);
+    location.hash=r.user.role==='admin'?'#admin':'';
     setPage(r.user.role==='admin'?'Admin':r.user.role==='seller'?'Sellers':'Home');
   };
   return(
     <div style={{minHeight:'85vh',display:'grid',placeItems:'center',background:'linear-gradient(135deg,#f4fbf6,#e8f5ec)'}}>
-      <div style={{width:420,background:'white',borderRadius:24,padding:44,boxShadow:'0 24px 64px rgba(0,0,0,.09)'}}>
+      <div className="auth-card" style={{maxWidth:420,width:'100%',background:'white',borderRadius:24,padding:44,boxShadow:'0 24px 64px rgba(0,0,0,.09)'}}>
         <div style={{textAlign:'center',marginBottom:32}}>
           <h2 style={{margin:0,fontSize:26}}>Welcome back</h2>
           <p style={{color:'#667085',margin:'10px 0 0',fontSize:14}}>Sign in to your SokoPrice account</p>
@@ -212,12 +247,13 @@ function Register({setPage}){
     const r=await post('/auth/register',form);
     setLoading(false);
     if(!r){setErr('Registration failed. Email may already be in use.');return;}
-    localStorage.setItem('sp_token',r.token);localStorage.setItem('sp_user',JSON.stringify(r.user));setUser(r.user);
+    localStorage.setItem('sp_token',r.token);localStorage.setItem('sp_user',JSON.stringify(r.user));
+    localStorage.setItem('sp_creds',btoa(form.email+':'+form.password));setUser(r.user);
     setPage(r.user.role==='seller'?'Sellers':'Home');
   };
   return(
     <div style={{minHeight:'85vh',display:'grid',placeItems:'center',background:'linear-gradient(135deg,#f4fbf6,#e8f5ec)'}}>
-      <div style={{width:480,background:'white',borderRadius:24,padding:44,boxShadow:'0 24px 64px rgba(0,0,0,.09)'}}>
+      <div className="auth-card" style={{maxWidth:480,width:'100%',background:'white',borderRadius:24,padding:44,boxShadow:'0 24px 64px rgba(0,0,0,.09)'}}>
         <div style={{textAlign:'center',marginBottom:32}}>
           <h2 style={{margin:'0 0 8px'}}>Create your account</h2>
           <p style={{color:'#667085',margin:0,fontSize:14}}>Join SokoPrice and shop smarter</p>
@@ -229,7 +265,7 @@ function Register({setPage}){
           <Inp label="Password" type="password" value={form.password} onChange={set('password')} placeholder="Create a password"/>
           <div>
             <span style={{fontWeight:700,fontSize:13,display:'block',marginBottom:8}}>I am a</span>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <div className="rg2" style={{gap:10}}>
               {['consumer','seller'].map(r=>(
                 <button key={r} onClick={()=>set('role')(r)}
                   style={{padding:'12px 16px',borderRadius:10,border:`2px solid ${form.role===r?'#087a3a':'#e5e9ef'}`,background:form.role===r?'#f4fbf6':'white',color:form.role===r?'#087a3a':'#344054',fontWeight:600,cursor:'pointer',textTransform:'capitalize',transition:'all .15s'}}>
@@ -254,7 +290,7 @@ function Register({setPage}){
 function Home({setPage}){
   return(
     <main>
-      <section style={{display:'grid',gridTemplateColumns:'1fr 1.1fr 1.7fr',gap:28,padding:'36px 0',alignItems:'center'}}>
+      <section className="rg-auto" style={{gap:28,padding:'36px 0',alignItems:'center'}}>
         <div style={{borderRadius:16,overflow:'hidden',position:'relative',minHeight:240,background:'#0a5c2b'}}>
           <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&q=80" alt="Market pricing"
             style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',opacity:.3}}/>
@@ -264,19 +300,11 @@ function Home({setPage}){
           </div>
         </div>
         <div>
-          <div style={{display:'inline-flex',alignItems:'center',gap:6,background:'#f4fbf6',border:'1px solid #c3e6cb',borderRadius:20,padding:'6px 14px',fontSize:12,color:'#087a3a',fontWeight:700,marginBottom:18}}>
-            AI-Powered Price Forecasting
-          </div>
           <h1 style={{fontSize:44,lineHeight:1.06,margin:'0 0 16px'}}>Smarter Grocery<br/><span style={{background:'linear-gradient(135deg,#087a3a,#0aab50)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Shopping Starts Here.</span></h1>
           <p style={{color:'#344054',lineHeight:1.75,fontSize:15,marginBottom:24}}>AI-powered price forecasts for Kigali's informal markets. Find the cheapest market, track price trends, and budget smarter.</p>
           <div style={{display:'flex',gap:12}}>
             <button className="primary" onClick={()=>setPage('Pricing')} style={{padding:'13px 24px',fontSize:14}}><LineChart size={16}/> View Prices</button>
             <button className="ghost" onClick={()=>setPage('Cost Estimator')} style={{padding:'13px 24px',fontSize:14}}><Wallet size={16}/> Estimate Cost</button>
-          </div>
-          <div style={{display:'flex',gap:28,marginTop:28,paddingTop:20,borderTop:'1px solid #e5e9ef'}}>
-            {[['8.27%','Model MAPE'],['0.9845','R Score'],['5','Markets'],['10','Commodities']].map(([v,l])=>(
-              <div key={l}><div style={{fontSize:20,fontWeight:800,color:'#087a3a'}}>{v}</div><div style={{fontSize:11,color:'#667085',marginTop:2}}>{l}</div></div>
-            ))}
           </div>
         </div>
         <div style={{display:'grid',gap:14}}>
@@ -286,7 +314,7 @@ function Home({setPage}){
             <div style={{fontSize:32,fontWeight:800,marginTop:6}}>520 RWF/kg</div>
             <div style={{fontSize:11,opacity:.65,marginTop:10}}>AI predicted, updated today</div>
           </Card>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <div className="rg2" style={{gap:14}}>
             {[[<LineChart size={20}/>,'AI Forecasting','7-day predictions'],[<MapPin size={20}/>,'GPS Distance','Find nearest market'],[<Wallet size={20}/>,'Basket Cost','Budget planning'],[<Bell size={20}/>,'Price Alerts','Stay informed']].map(([icon,t,d])=>(
               <Card key={t} style={{padding:'14px 16px'}}><div style={{color:'#087a3a',marginBottom:8}}>{icon}</div><div style={{fontWeight:700,fontSize:13}}>{t}</div><div style={{color:'#667085',fontSize:12,marginTop:2}}>{d}</div></Card>
             ))}
@@ -296,7 +324,7 @@ function Home({setPage}){
       <section style={{padding:'8px 0 36px'}}>
         <h2 style={{textAlign:'center',marginBottom:6}}>Kigali's Top <span style={{color:'#087a3a'}}>Markets</span></h2>
         <p style={{textAlign:'center',color:'#667085',marginBottom:24,fontSize:14}}>Click a market to explore prices</p>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:16}}>
+        <div className="marketcards" style={{gap:16}}>
           {MARKETS.map((m,i)=>(
             <div key={m} onClick={()=>setPage('Markets')}
               style={{borderRadius:16,overflow:'hidden',cursor:'pointer',boxShadow:'0 4px 16px rgba(0,0,0,.07)',transition:'transform .2s,box-shadow .2s'}}
@@ -320,12 +348,15 @@ function Pricing(){
   const{post}=useApi();const userLoc=useLocation();
   const[product,setProduct]=useState('Maize');const[market,setMarket]=useState('Kimironko');
   const[forecast,setForecast]=useState(null);const[compare,setCompare]=useState([]);const[loading,setLoading]=useState(false);
+  const today=new Date();
+  const forecastDates=Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(d.getDate()+i+1);return d.toISOString().split('T')[0];});
+  const[forecastDate,setForecastDate]=useState(forecastDates[6]);
 
   const fetchData=useCallback(async()=>{
-    setLoading(true);const dt=nextWeek();
-    const[pred,recs]=await Promise.all([post('/predict',{commodity:product,market,forecast_date:dt}),post('/recommend',{commodity:product,forecast_date:dt})]);
+    setLoading(true);
+    const[pred,recs]=await Promise.all([post('/predict',{commodity:product,market,forecast_date:forecastDate}),post('/recommend',{commodity:product,forecast_date:forecastDate})]);
     setForecast(pred);setCompare(recs||[]);setLoading(false);
-  },[product,market]);
+  },[product,market,forecastDate]);
 
   useEffect(()=>{fetchData();},[fetchData]);
 
@@ -335,26 +366,31 @@ function Pricing(){
 
   return(
     <main>
-      <section style={{display:'grid',gridTemplateColumns:'1fr 1.3fr 2fr',gap:28,padding:'32px 0 24px',alignItems:'start'}}>
-        <HeroImg/>
-        <div>
-          <h1>Smart Prices.<br/><span style={{background:'linear-gradient(135deg,#087a3a,#0aab50)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Better Decisions.</span></h1>
-          <p style={{color:'#344054'}}>AI-powered forecasts across all Kigali markets, updated daily.</p>
-          {userLoc?<Badge>Location detected, showing distances</Badge>:<span style={{fontSize:12,color:'#667085'}}>Allow location to see distances</span>}
+      <section className="rg-auto" style={{gap:28,padding:'32px 0 24px',alignItems:'start'}}>
+        <div className="hero-img" style={{borderRadius:16,overflow:'hidden',position:'relative',background:'linear-gradient(135deg,#0a5c2b,#0d8a3e)',padding:'44px 32px',display:'flex',flexDirection:'column',justifyContent:'flex-end',minHeight:320}}>
+          <div style={{position:'absolute',inset:0,background:'url(https://images.unsplash.com/photo-1542838132-92c53300491e?w=700&q=80) center/cover',opacity:.22}}/>
+          <div style={{position:'relative',zIndex:1,color:'white'}}>
+            <div style={{fontWeight:800,fontSize:22,marginBottom:4}}>Kigali Markets</div>
+            <div style={{color:'rgba(255,255,255,.65)',fontSize:13,marginBottom:28}}>AI-powered price forecasts</div>
+            <h1 style={{color:'white',margin:'0 0 8px',fontSize:36,lineHeight:1.15}}>Smart Prices.<br/><span style={{color:'#86efac'}}>Better Decisions.</span></h1>
+            <p style={{color:'rgba(255,255,255,.8)',margin:'0 0 14px',fontSize:15}}>AI-powered forecasts across all Kigali markets, updated daily.</p>
+            {userLoc?<Badge>Location detected, showing distances</Badge>:<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}>Allow location to see distances</span>}
+          </div>
         </div>
         <Card>
           <h3 style={{margin:'0 0 14px'}}>Configure Forecast</h3>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+          <div className="rg2" style={{gap:12,marginBottom:12}}>
             <Sel label="Product" value={product} onChange={setProduct} items={COMMODITIES}/>
             <Sel label="Market" value={market} onChange={setMarket} items={MARKETS}/>
           </div>
+          <Sel label="Forecast Date" value={forecastDate} onChange={setForecastDate} items={forecastDates} style={{marginBottom:12}}/>
           <button className="orange" style={{width:'100%',padding:'13px 0',fontSize:14}} onClick={fetchData} disabled={loading}><LineChart size={16}/> {loading?'Forecasting...':'Get Forecast'}</button>
         </Card>
       </section>
 
       {loading?<Spinner/>:(
         <>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1.5fr',gap:16,marginBottom:24}}>
+          <div className="forecast-summary" style={{marginBottom:24}}>
             <Stat icon={<LineChart size={18}/>} label="Predicted Price" value={`${money(price)} RWF/kg`} sub="7 days ahead"/>
             <Stat icon={<Wallet size={18}/>} label="Confidence Range" value={forecast?`${money(forecast.confidence_lower)}-${money(forecast.confidence_upper)}`:'---'} sub="90% interval"/>
             <Stat icon={<TrendingUp size={18}/>} label="Price Trend" value={<TrendBadge trend={forecast?.trend||'stable'}/>} sub="vs last month"/>
@@ -365,7 +401,7 @@ function Pricing(){
               {best&&<div style={{fontSize:11,opacity:.65,marginTop:8}}>Save {money(best.saving_vs_most_expensive)} RWF</div>}
             </Card>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'1.8fr 1fr',gap:20}}>
+          <div className="grid2" style={{gap:20}}>
             <Card>
               <h3 style={{marginTop:0}}>{product} - Market Comparison</h3>
               <table>
@@ -422,7 +458,7 @@ function Markets({basketItems,setPage}){
         <p style={{color:'#344054',fontSize:15}}>Explore markets, see seller listings, and find the best prices near you.</p>
         {userLoc?<Badge>Showing distances from your location</Badge>:<span style={{fontSize:13,color:'#667085'}}>Allow location to see distances</span>}
       </section>
-      <div style={{display:'grid',gridTemplateColumns:'1.1fr 1fr',gap:24,marginBottom:28}}>
+      <div className="grid2" style={{marginBottom:28}}>
         <div>
           <Card style={{padding:0,overflow:'hidden',marginBottom:16}}>
             <div style={{padding:'16px 20px',borderBottom:'1px solid #e5e9ef'}}>
@@ -445,7 +481,13 @@ function Markets({basketItems,setPage}){
                       <td style={{fontWeight:600}}>{p.commodity}</td>
                       <td style={{fontWeight:700,color:'#087a3a'}}>{money(p.price_rwf)} RWF/kg</td>
                       <td>{p.quantity_kg} kg</td>
-                      <td style={{fontSize:12,color:'#667085'}}>{p.seller_name}</td>
+                      <td style={{fontSize:12,color:'#667085'}}>
+                        {p.seller_name}
+                        <button onClick={()=>{sessionStorage.setItem('sp_chat_target',JSON.stringify({partner_id:p.seller_id,partner_name:p.seller_name}));}}
+                          style={{marginLeft:6,background:'#f4fbf6',border:'1px solid #c3e6cb',borderRadius:14,padding:'3px 8px',cursor:'pointer',color:'#087a3a',fontSize:10,fontWeight:600}}>
+                          Chat
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -453,7 +495,7 @@ function Markets({basketItems,setPage}){
             }
           </Card>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,alignContent:'start'}}>
+        <div className="rg2" style={{gap:14,alignContent:'start'}}>
           {MARKETS.map((m,i)=>{
             const dist=distTo(m,userLoc);const isSel=m===selected;
             return(
@@ -527,11 +569,11 @@ function CostEstimator({setPage,setSharedBasket}){
         <h1>Cost <span style={{color:'#087a3a'}}>Estimator</span></h1>
         <p style={{color:'#344054',fontSize:15}}>Build your basket, set a budget, and find the best market to shop from.</p>
       </section>
-      <div style={{display:'grid',gridTemplateColumns:'1.6fr 1fr',gap:24}}>
+      <div className="grid2" style={{gap:24}}>
         <div style={{display:'grid',gap:16}}>
           <Card>
             <h3 style={{marginTop:0}}>Add Items</h3>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 90px 48px',gap:12,alignItems:'end'}}>
+            <div className="rg-auto-sm" style={{gap:12,alignItems:'end'}}>
               <Sel label="Product" value={product} onChange={setProduct} items={COMMODITIES}/>
               <Sel label="Market" value={market} onChange={m=>{setMarket(m);runBasket(items,m);}} items={MARKETS}/>
               <Inp label="Qty (kg)" type="number" value={qty} onChange={setQty}/>
@@ -633,6 +675,12 @@ function CostEstimator({setPage,setSharedBasket}){
                 <Tooltip formatter={v=>`${money(v)} RWF`}/>
               </PieChart>
             </ResponsiveContainer>
+            <div style={{marginTop:18}}>
+              <div style={{fontWeight:700,fontSize:12,marginBottom:10,color:'#344054'}}>Commodity Colors</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'8px 16px'}}>
+                {display.map((r,i)=><div key={r.commodity} style={{display:'flex',alignItems:'center',gap:7}}><div style={{width:12,height:12,borderRadius:3,background:PALETTE[i%PALETTE.length],flexShrink:0}}/><span style={{fontSize:12,fontWeight:500}}>{r.commodity}</span></div>)}
+              </div>
+            </div>
           </Card>
           <button className="orange" onClick={()=>runBasket()} disabled={loading} style={{padding:'14px 0',borderRadius:10}}>{loading?'Recalculating...':'Recalculate'}</button>
         </div>
@@ -694,7 +742,7 @@ function Alerts(){
         <h1>Price <span style={{color:'#087a3a'}}>Alerts</span></h1>
         <p style={{color:'#344054',fontSize:15}}>AI-predicted alerts based on current forecasts and your budget thresholds.</p>
       </section>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1.6fr',gap:24}}>
+      <div className="grid2" style={{gap:24,gridTemplateColumns:'1fr 1.2fr'}}>
         <div style={{display:'grid',gap:16,alignContent:'start'}}>
           <Card>
             <h3 style={{marginTop:0}}>Check a Price Alert</h3>
@@ -751,32 +799,39 @@ function Sellers(){
     if(d)setProducts(d.products);setLoading(false);
   };
 
+  const[submissions,setSubmissions]=useState([]);
+  const loadSubmissions=async()=>{
+    const d=await get('/seller/submissions');
+    if(d)setSubmissions(d.submissions||[]);
+  };
+
   const loadInsights=async c=>{
     const d=await get(`/seller/insights/${c}`);
     if(d){setInsights(d);setChartData(d.market_prices.map(m=>({name:m.market.split(' ')[0],ai:m.ai_price})));}
   };
 
-  useEffect(()=>{if(user&&(user.role==='seller'||user.role==='admin')){load();loadInsights(form.commodity);}},[ user]);
+  useEffect(()=>{if(user&&(user.role==='seller'||user.role==='admin')){load();loadSubmissions();loadInsights(form.commodity);}},[ user]);
 
   const addProduct=async()=>{
     if(!form.price_rwf)return;
     await post('/seller/products',{...form,price_rwf:Number(form.price_rwf),quantity_kg:Number(form.quantity_kg)||1});
     load();set('price_rwf')('');
   };
-  const saveEdit=async id=>{await put(`/seller/products/${id}`,{price_rwf:Number(editPrice)});setEditId(null);load();};
+  const saveEdit=async id=>{await put(`/seller/products/${id}`,{price_rwf:Number(editPrice)});setEditId(null);load();loadSubmissions();};
   const remove=async id=>{if(!confirm('Delete this listing?'))return;await del(`/seller/products/${id}`);load();};
 
-  // Real-time price entry: add to DB via admin upload shortcut
+  // Real-time price entry: submit for admin approval
   const[newPrice,setNewPrice]=useState('');
   const[newDate,setNewDate]=useState(new Date().toISOString().split('T')[0]);
-  const{upl}=useApi();
 
   const submitRealPrice=async()=>{
     if(!newPrice||!form.commodity||!form.market)return;
-    const csv=`commodity,market,price_rwf,price_date\n${form.commodity},${form.market},${newPrice},${newDate}`;
-    const fd=new FormData();fd.append('file',new Blob([csv],{type:'text/csv'}),'prices.csv');
-    await upl('/admin/upload-prices',fd);
-    alert('Price submitted to model. Predictions will update.');
+    const result=await post('/seller/submit-price',{
+      commodity:form.commodity,market:form.market,
+      price_rwf:Number(newPrice),price_date:newDate
+    });
+    if(result){alert(result.message||'Price submitted for admin review.');loadSubmissions();}
+    else{alert('Failed to submit price. Please try again.');}
     setNewPrice('');
   };
 
@@ -791,27 +846,17 @@ function Sellers(){
 
   return(
     <main>
-      <section style={{padding:'32px 0 24px',display:'grid',gridTemplateColumns:'1fr auto',gap:24,alignItems:'start'}}>
+      <section style={{padding:'32px 0 24px'}} className="rg-auto" >
         <div>
           <h1 style={{margin:0}}>Seller <span style={{color:'#087a3a'}}>Dashboard</span></h1>
           <p style={{color:'#344054',marginTop:8}}>Manage listings and track AI price comparisons in real time.</p>
         </div>
-        <div style={{position:'relative',borderRadius:16,overflow:'hidden',width:280,height:160}}>
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80" alt="Seller using app"
-            style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-          <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(8,122,58,.7),transparent)'}}/>
-          <div style={{position:'absolute',bottom:12,left:14,color:'white',fontSize:13,fontWeight:600}}>Track your prices in real time</div>
-        </div>
-        <div style={{display:'flex',gap:16}}>
-          <Stat icon={<Store size={16}/>} label="Listings" value={products.length} color="#087a3a"/>
-          <Stat icon={<Bell size={16}/>} label="Above Market" value={products.filter(p=>p.price_status==='above_market').length} color="#d92d20"/>
-        </div>
       </section>
-      <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:24}}>
+      <div className="grid2" style={{gap:24}}>
         <div style={{display:'grid',gap:16}}>
           <Card>
             <h3 style={{marginTop:0}}>Add New Listing</h3>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+            <div className="rg2" style={{gap:12}}>
               <Sel label="Commodity" value={form.commodity} onChange={v=>{set('commodity')(v);loadInsights(v);}} items={COMMODITIES}/>
               <Sel label="Market" value={form.market} onChange={set('market')} items={MARKETS}/>
               <Inp label="Your Price (RWF/kg)" type="number" value={form.price_rwf} onChange={set('price_rwf')} placeholder="e.g. 520"/>
@@ -823,7 +868,7 @@ function Sellers(){
           <Card>
             <h3 style={{marginTop:0}}>Submit Real Price to Model</h3>
             <p style={{fontSize:13,color:'#667085'}}>Enter today's actual market price. This feeds into the AI model to improve predictions.</p>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr auto',gap:12,alignItems:'end'}}>
+            <div className="rg-auto-sm" style={{gap:12,alignItems:'end'}}>
               <Sel label="Commodity" value={form.commodity} onChange={v=>{set('commodity')(v);loadInsights(v);}} items={COMMODITIES}/>
               <Sel label="Market" value={form.market} onChange={set('market')} items={MARKETS}/>
               <Inp label="Actual Price (RWF)" type="number" value={newPrice} onChange={setNewPrice} placeholder="e.g. 480"/>
@@ -859,13 +904,48 @@ function Sellers(){
               </table>
             }
           </Card>
+
+          <Card>
+            <h3 style={{marginTop:0}}>My Price Submissions</h3>
+            <p style={{fontSize:12,color:'#667085',marginBottom:12}}>Track the review status of prices you've submitted to improve the AI model.</p>
+            {submissions.length===0
+              ?<div style={{textAlign:'center',padding:20,color:'#667085',fontSize:13}}>No price submissions yet. Submit a real price above.</div>
+              :<table>
+                <tbody>
+                  <tr><th>Commodity</th><th>Market</th><th>Price</th><th>Date</th><th>Status</th></tr>
+                  {submissions.map(s=>(
+                    <tr key={s.id}>
+                      <td style={{fontWeight:600}}>{s.commodity}</td>
+                      <td style={{fontSize:12}}>{s.market}</td>
+                      <td style={{fontWeight:700,color:'#087a3a'}}>{money(s.price_rwf)} RWF</td>
+                      <td style={{fontSize:12}}>{s.price_date}</td>
+                      <td><Badge color={s.status==='approved'?'#087a3a':s.status==='rejected'?'#d92d20':'#ff6b00'}>{s.status==='approved'?'Approved':s.status==='rejected'?'Rejected':'Pending'}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          </Card>
         </div>
 
         <div style={{display:'grid',gap:16,alignContent:'start'}}>
+          <div style={{position:'relative',borderRadius:16,overflow:'hidden',width:'100%',height:280,margin:'-8px 0'}}>
+            <img src="/seller.png" alt="Happy market seller" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+            <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg, rgba(8,122,58,0) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 75%, rgba(0,0,0,0.85) 100%)'}}/>
+            <div style={{position:'absolute',bottom:24,left:24,right:24}}>
+              <div style={{background:'rgba(0,0,0,.55)',backdropFilter:'blur(4px)',WebkitBackdropFilter:'blur(4px)',display:'inline-block',padding:'5px 14px',borderRadius:8}}>
+                <span style={{color:'rgba(255,255,255,.9)',fontSize:12}}>Manage your market presence</span>
+              </div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:16}}>
+            <Stat icon={<Store size={16}/>} label="Listings" value={products.length} color="#087a3a"/>
+            <Stat icon={<Bell size={16}/>} label="Above Market" value={products.filter(p=>p.price_status==='above_market').length} color="#d92d20"/>
+          </div>
           {insights&&(
             <Card>
-              <h3 style={{marginTop:0}}>AI Market Prices - {insights.commodity}</h3>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+              <h3 style={{marginTop:0}}>Market Prices - {insights.commodity}</h3>
+              <div className="rg2" style={{gap:10,marginBottom:14}}>
                 <div style={{background:'#f4fbf6',borderRadius:10,padding:12}}>
                   <div style={{fontSize:11,color:'#667085'}}>Cheapest Market</div>
                   <div style={{fontWeight:700,color:'#087a3a',marginTop:2}}>{insights.cheapest}</div>
@@ -889,6 +969,13 @@ function Sellers(){
                   <Bar dataKey="yours" name="Your Price" fill="#087a3a" radius={[4,4,0,0]}/>
                 </BarChart>
               </ResponsiveContainer>
+              <div style={{marginTop:18}}>
+                <div style={{fontWeight:700,fontSize:12,marginBottom:10,color:'#344054'}}>Chart Legend</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:'8px 16px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:7}}><div style={{width:12,height:12,borderRadius:3,background:'#c3e6cb',flexShrink:0}}/><span style={{fontSize:12,fontWeight:500}}>AI Forecast</span></div>
+                  <div style={{display:'flex',alignItems:'center',gap:7}}><div style={{width:12,height:12,borderRadius:3,background:'#087a3a',flexShrink:0}}/><span style={{fontSize:12,fontWeight:500}}>Your Price</span></div>
+                </div>
+              </div>
             </Card>
           )}
           <Card>
@@ -910,32 +997,15 @@ function Sellers(){
 function About(){
   return(
     <main>
-      <section style={{display:'grid',gridTemplateColumns:'1fr 1.4fr 1.5fr',gap:28,padding:'32px 0',alignItems:'center'}}>
+      <section className="rg-auto" style={{gap:28,padding:'32px 0',alignItems:'center'}}>
         <HeroImg/>
         <div>
           <h1>About <span style={{background:'linear-gradient(135deg,#087a3a,#0aab50)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>SokoPrice</span></h1>
           <p style={{lineHeight:1.8,fontSize:15}}>SokoPrice is an AI-powered platform helping Kigali shoppers make smarter grocery decisions with accurate price forecasts, market comparisons, and GPS-based distance recommendations.</p>
-          <div style={{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}>
-            <Badge>BSc Software Engineering</Badge>
-            <Badge color="#ff6b00">ALU Capstone 2026</Badge>
-            <Badge color="#845ec2">CRISP-DM</Badge>
-          </div>
         </div>
-        <Card style={{background:'linear-gradient(135deg,#087a3a,#0aab50)',color:'white',border:'none',padding:'24px'}}>
-          <div style={{fontSize:12,opacity:.75,marginBottom:12}}>Mission</div>
-          <p style={{fontSize:17,lineHeight:1.75,fontStyle:'italic',margin:0}}>"Make grocery prices clear, fair, and accessible for all Kigali households."</p>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:22}}>
-            {[['8.27%','MAPE'],['0.9845','R Score'],['5','Markets'],['10','Commodities']].map(([v,l])=>(
-              <div key={l} style={{background:'rgba(255,255,255,.15)',borderRadius:10,padding:'12px 14px'}}>
-                <div style={{fontSize:22,fontWeight:800}}>{v}</div>
-                <div style={{fontSize:11,opacity:.75,marginTop:2}}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
       </section>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
-        {[['Mission','Empower Kigali households with AI-driven price insights that reduce information asymmetry between vendors and consumers.'],['Vision','A future where every Kigali household has equal access to market intelligence for fair, informed purchasing.'],['Technology','XGBoost on WFP proxy data. FastAPI backend. React and Leaflet frontend. Rolling window validation. SQLite database.']].map(([t,d])=>(
+      <div className="rg2" style={{gap:20}}>
+        {[['Mission','Empower Kigali households with AI-driven price insights that reduce information asymmetry between vendors and consumers.'],['Vision','A future where every Kigali household has equal access to market intelligence for fair, informed purchasing.']].map(([t,d])=>(
           <Card key={t}><h3 style={{marginTop:0}}>{t}</h3><p style={{color:'#344054',fontSize:14,lineHeight:1.75,margin:0}}>{d}</p></Card>
         ))}
       </div>
@@ -945,11 +1015,26 @@ function About(){
 
 // Admin - hidden, only via #admin hash
 function Admin(){
-  const{get,put,upl}=useApi();const{user}=useAuth();
+  const{get,post,put,upl}=useApi();const{user}=useAuth();
   const[stats,setStats]=useState(null);const[users,setUsers]=useState([]);
   const[products,setProducts]=useState([]);const[tab,setTab]=useState('overview');
   const[uploading,setUploading]=useState(false);const[uploadMsg,setUploadMsg]=useState('');
+  const[retraining,setRetraining]=useState(false);const[retrainResult,setRetrainResult]=useState(null);const[retrainError,setRetrainError]=useState('');
   const fileRef=useRef(null);
+  const[pendingSubs,setPendingSubs]=useState([]);
+
+  const loadPendingSubs=async()=>{
+    const d=await get('/admin/pending-submissions');
+    if(d)setPendingSubs(d.submissions||[]);
+  };
+  const approveSub=async id=>{
+    await post('/admin/approve-submission/'+id,{});
+    loadPendingSubs();get('/admin/stats').then(d=>d&&setStats(d));
+  };
+  const rejectSub=async id=>{
+    await post('/admin/reject-submission/'+id,{});
+    loadPendingSubs();
+  };
 
   useEffect(()=>{
     if(!user||user.role!=='admin')return;
@@ -957,6 +1042,10 @@ function Admin(){
     get('/admin/users').then(d=>d&&setUsers(d.users));
     get('/admin/products').then(d=>d&&setProducts(d.products));
   },[user]);
+
+  useEffect(()=>{
+    if(tab==='pending'&&user&&user.role==='admin')loadPendingSubs();
+  },[tab,user]);
 
   const suspendUser=async id=>{await put(`/admin/users/${id}/suspend`,{});get('/admin/users').then(d=>d&&setUsers(d.users));};
   const handleUpload=async e=>{
@@ -968,17 +1057,27 @@ function Admin(){
     setUploadMsg(r?`Added ${r.rows_added} price records. Predictions will now use real data.`:'Upload failed.');
     e.target.value='';
   };
+  const handleRetrain=async()=>{
+    setRetraining(true);setRetrainError('');setRetrainResult(null);
+    try{
+      const tok=localStorage.getItem('sp_token');
+      const r=await fetch(API+'/admin/retrain',{method:'POST',headers:{'Authorization':`Bearer ${tok}`}});
+      const d=await r.json();
+      if(!r.ok){setRetrainError(d.detail||'Retraining failed');}
+      else{setRetrainResult(d);}
+    }catch{setRetrainError('Network error - retraining failed');}
+    setRetraining(false);
+  };
 
   if(!user||user.role!=='admin')return <main style={{textAlign:'center',padding:'80px 0'}}><h2>Access Restricted</h2></main>;
 
-  const TABS=[['overview','Overview'],['users','Users'],['products','Products'],['data','Data Upload'],['prices','Market Prices']];
+  const TABS=[['overview','Overview'],['users','Users'],['products','Products'],['pending','Pending Approvals'],['data','Data Upload'],['prices','Market Prices']];
   const[priceMarket,setPriceMarket]=useState('Kimironko');
   const[mktPrices,setMktPrices]=useState([]);
-  const{post:adminPost}=useApi();
   useEffect(()=>{
     if(tab!=='prices'||!user||user.role!=='admin')return;
     Promise.all(COMMODITIES.map(async c=>{
-      const d=await adminPost('/predict',{commodity:c,market:priceMarket,forecast_date:nextWeek()});
+      const d=await post('/predict',{commodity:c,market:priceMarket,forecast_date:nextWeek()});
       return d?{commodity:c,price:d.predicted_price_kes,trend:d.trend,source:d.data_source}:{commodity:c,price:0,trend:'stable',source:'proxy'};
     })).then(setMktPrices);
   },[tab,priceMarket]);
@@ -987,26 +1086,25 @@ function Admin(){
     <main>
       <section style={{padding:'32px 0 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div>
-          <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'#fff5e6',border:'1px solid #fed7aa',borderRadius:20,padding:'6px 14px',fontSize:12,color:'#ff6b00',fontWeight:700,marginBottom:12}}><Shield size={13}/> Admin Dashboard - Restricted Access</div>
           <h1 style={{margin:0}}>Platform <span style={{color:'#087a3a'}}>Control Centre</span></h1>
         </div>
-        <div style={{display:'flex',gap:8}}>
+        <div className="admin-tabs" style={{display:'flex',gap:8,flexWrap:'wrap'}}>
           {TABS.map(([t,l])=>(
-            <button key={t} onClick={()=>setTab(t)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid',borderColor:tab===t?'#087a3a':'#e5e9ef',background:tab===t?'#087a3a':'white',color:tab===t?'white':'#344054',fontWeight:600,cursor:'pointer',fontSize:13}}>{l}</button>
+            <button key={t} onClick={()=>setTab(t)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid',borderColor:tab===t?'#087a3a':'#e5e9ef',background:tab===t?'#087a3a':'white',color:tab===t?'white':'#344054',fontWeight:600,cursor:'pointer',fontSize:13,whiteSpace:'nowrap'}}>{l}</button>
           ))}
         </div>
       </section>
 
       {tab==='overview'&&stats&&(
         <>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:16,marginBottom:24}}>
+          <div className="admin-grid" style={{marginBottom:24,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:16}}>
             <Stat icon={<Users size={18}/>} label="Users" value={stats.total_users} color="#087a3a"/>
             <Stat icon={<Store size={18}/>} label="Sellers" value={stats.total_sellers} color="#ff6b00"/>
             <Stat icon={<ShoppingBasket size={18}/>} label="Products" value={stats.total_products} color="#845ec2"/>
             <Stat icon={<LineChart size={18}/>} label="Forecasts" value={stats.total_forecasts} color="#3498db"/>
             <Stat icon={<CheckCircle size={18}/>} label="Price Records" value={stats.total_price_records} color="#087a3a"/>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'1.6fr 1fr',gap:20}}>
+          <div className="grid2" style={{gap:20}}>
             <Card>
               <h3 style={{marginTop:0}}>Recent Forecast Requests</h3>
               <table>
@@ -1068,8 +1166,37 @@ function Admin(){
         </Card>
       )}
 
+      {tab==='pending'&&(
+        <Card>
+          <h3 style={{marginTop:0}}>Pending Price Submissions ({pendingSubs.length})</h3>
+          <p style={{fontSize:13,color:'#667085',marginBottom:16}}>Review seller-submitted prices before they feed into the AI model.</p>
+          {pendingSubs.length===0?<div style={{textAlign:'center',padding:32,color:'#667085'}}>No pending submissions.</div>:
+          <table>
+            <tbody>
+              <tr><th>Seller</th><th>Commodity</th><th>Market</th><th>Price</th><th>Date</th><th>Submitted</th><th>Actions</th></tr>
+              {pendingSubs.map(s=>(
+                <tr key={s.id}>
+                  <td><div style={{fontWeight:600}}>{s.seller_name}</div><div style={{fontSize:11,color:'#667085'}}>{s.seller_email}</div></td>
+                  <td style={{fontWeight:600}}>{s.commodity}</td>
+                  <td style={{fontSize:12}}>{s.market}</td>
+                  <td style={{fontWeight:700,color:'#087a3a'}}>{money(s.price_rwf)} RWF</td>
+                  <td style={{fontSize:12}}>{s.price_date}</td>
+                  <td style={{fontSize:11,color:'#667085'}}>{new Date(s.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <div style={{display:'flex',gap:6}}>
+                      <button onClick={()=>approveSub(s.id)} style={{background:'#f4fbf6',border:'1px solid #86efac',borderRadius:6,padding:'5px 10px',cursor:'pointer',color:'#087a3a',fontSize:12,fontWeight:600}}>Approve</button>
+                      <button onClick={()=>rejectSub(s.id)} style={{background:'#fff5f5',border:'1px solid #fca5a5',borderRadius:6,padding:'5px 10px',cursor:'pointer',color:'#d92d20',fontSize:12,fontWeight:600}}>Reject</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </Card>
+      )}
+
       {tab==='data'&&(
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
+        <div className="rg2" style={{gap:20}}>
           <Card>
             <h3 style={{marginTop:0}}>Upload Real Price Data</h3>
             <p style={{color:'#344054',fontSize:14,lineHeight:1.8}}>Upload a CSV with real Kigali market prices. The model will use this data immediately to improve predictions for all users.</p>
@@ -1087,12 +1214,53 @@ function Admin(){
             <button className="orange" style={{width:'100%',padding:'14px 0',borderRadius:10}} onClick={()=>fileRef.current.click()} disabled={uploading}><Upload size={16}/> {uploading?'Uploading...':'Upload CSV'}</button>
           </Card>
           <Card>
-            <h3 style={{marginTop:0}}>System Information</h3>
-            <div style={{display:'grid',gap:10}}>
-              {[['Model','XGBoost (tuned)'],['MAPE','8.27%'],['R Score','0.9845'],['Markets','5 Kigali markets'],['Commodities','10 staple foods'],['Price Unit','RWF'],['Training Data','WFP Kenya (proxy)'],['Validation','Rolling window, 3yr train, 1yr predict'],['Database','SQLite'],['Auth','JWT token-based']].map(([k,v])=>(
-                <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'9px 12px',background:'#f8f9fa',borderRadius:8}}><span style={{color:'#667085',fontSize:13}}>{k}</span><span style={{fontWeight:700,fontSize:13}}>{v}</span></div>
-              ))}
+            <h3 style={{marginTop:0}}>Model Retraining</h3>
+
+            {/* Current model metrics */}
+            <div style={{background:'#f8f9fa',borderRadius:12,padding:16,marginBottom:16}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#667085',marginBottom:10}}>Current Model Performance</div>
+              <div className="rg3" style={{gap:10}}>
+                {[['MAPE',retrainResult?retrainResult.mape_percent+'%':'8.27%'],['R² Score',retrainResult?retrainResult.r2_score:'0.9845'],['Samples',retrainResult?retrainResult.samples_used+retrainResult.test_samples:'---']].map(([k,v])=>(
+                  <div key={k} style={{textAlign:'center',padding:'10px 8px',background:'white',borderRadius:8,border:'1px solid #e5e9ef'}}>
+                    <div style={{fontWeight:800,fontSize:18,color:'#087a3a'}}>{v}</div>
+                    <div style={{fontSize:11,color:'#667085',marginTop:2}}>{k}</div>
+                  </div>
+                ))}
+              </div>
+              {retrainResult&&(
+                <div style={{marginTop:10,fontSize:12,color:'#667085'}}>
+                  RMSE: {retrainResult.rmse_rwf} RWF &nbsp;|&nbsp;
+                  Records: {retrainResult.total_price_records} &nbsp;|&nbsp;
+                  Pairs: {retrainResult.commodity_market_pairs}
+                </div>
+              )}
             </div>
+
+            {/* Retrain error */}
+            {retrainError&&<div style={{background:'#fff5f5',border:'1px solid #fca5a5',borderRadius:8,padding:12,marginBottom:12,fontSize:13,color:'#d92d20'}}>{retrainError}</div>}
+
+            {/* Retrain success */}
+            {retrainResult&&(
+              <div style={{background:'#f4fbf6',border:'2px solid #86efac',borderRadius:12,padding:16,marginBottom:12}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                  <CheckCircle size={18} color="#087a3a"/>
+                  <span style={{fontWeight:700,color:'#087a3a',fontSize:15}}>Model Retrained Successfully!</span>
+                </div>
+                <div className="rg2" style={{gap:8,fontSize:13}}>
+                  <div>MAPE: <b>{retrainResult.mape_percent}%</b></div>
+                  <div>R²: <b>{retrainResult.r2_score}</b></div>
+                  <div>RMSE: <b>{retrainResult.rmse_rwf} RWF</b></div>
+                  <div>Training Samples: <b>{retrainResult.samples_used}</b></div>
+                  <div>Test Samples: <b>{retrainResult.test_samples}</b></div>
+                  <div>Total Records: <b>{retrainResult.total_price_records}</b></div>
+                </div>
+              </div>
+            )}
+
+            <button className="primary" style={{width:'100%',padding:'14px 0',borderRadius:10}} onClick={handleRetrain} disabled={retraining}>
+              <LineChart size={16}/> {retraining?'Retraining Model...':'Retrain Model on Uploaded Data'}
+            </button>
+            <p style={{fontSize:11,color:'#667085',marginTop:8,textAlign:'center'}}>Requires 30+ price records across multiple dates</p>
           </Card>
         </div>
       )}
@@ -1125,34 +1293,279 @@ function Admin(){
   );
 }
 
+// Chat Widget — realtime-style messenger UI with WhatsApp-like design
+const fmtChatTime=ts=>{const d=new Date(ts);const now=new Date();const isToday=d.toDateString()===now.toDateString();const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);const isYesterday=d.toDateString()===yesterday.toDateString();if(isToday)return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});if(isYesterday)return 'Yesterday';return d.toLocaleDateString([],{month:'short',day:'numeric'});};
+const fmtMsgTime=ts=>new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const needsDateSep=(msgs,i)=>{if(i===0)return true;const cur=new Date(msgs[i].created_at).toDateString();const prev=new Date(msgs[i-1].created_at).toDateString();return cur!==prev;};
+const dateSepLabel=ts=>{const d=new Date(ts);const now=new Date();if(d.toDateString()===now.toDateString())return 'Today';const y=new Date(now);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return 'Yesterday';return d.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});};
+
+function ChatWidget(){
+  const{user}=useAuth();const{get,post}=useApi();
+  const[open,setOpen]=useState(false);
+  const[view,setView]=useState('conversations');
+  const[convs,setConvs]=useState([]);
+  const[messages,setMessages]=useState([]);
+  const[partner,setPartner]=useState(null);
+  const[text,setText]=useState('');
+  const[sending,setSending]=useState(false);
+  const[sendErr,setSendErr]=useState('');
+  const[unreadTotal,setUnreadTotal]=useState(0);
+  const chatRef=useRef(null);
+  const inputRef=useRef(null);
+  const pollRef=useRef(null);
+
+  const loadConversations=async()=>{
+    const d=await get('/messages/conversations');
+    if(d){setConvs(d.conversations||[]);setUnreadTotal(d.conversations?.reduce((s,c)=>s+(c.unread||0),0)||0);}
+  };
+
+  const loadUnread=async()=>{const d=await get('/messages/unread-count');if(d)setUnreadTotal(d.count||0);};
+
+  const openChat=async(p)=>{
+    setPartner(p);setView('chat');setSendErr('');
+    const d=await get('/messages/'+p.partner_id);
+    if(d)setMessages(d.messages||[]);
+    setTimeout(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},100);
+  };
+
+  const sendMessage=async()=>{
+    if(!text.trim()||!partner||!partner.partner_id)return;
+    setSending(true);setSendErr('');
+    const token=localStorage.getItem('sp_token');
+    try{
+      const res=await fetch(API+'/messages/send',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({receiver_id:partner.partner_id,message:text.trim()})});
+      const data=await res.json();
+      if(!res.ok){setSendErr('Failed: '+(data.detail||res.status));}
+      else{setMessages(m=>[...m,{...data,sender_name:user.name}]);setText('');inputRef.current?.focus();}
+    }catch(e){setSendErr('Network error');}
+    setSending(false);
+  };
+
+  const backToConvs=()=>{setView('conversations');setPartner(null);setMessages([]);loadConversations();};
+
+  // External chat triggers from Markets page
+  useEffect(()=>{
+    const check=()=>{const raw=sessionStorage.getItem('sp_chat_target');if(!raw)return;sessionStorage.removeItem('sp_chat_target');try{const p=JSON.parse(raw);setOpen(true);setPartner(p);setView('chat');get('/messages/'+p.partner_id).then(d=>{if(d)setMessages(d.messages||[]);});}catch{}};const iv=setInterval(check,400);return ()=>clearInterval(iv);},[]);
+
+  // Conversations polling while open
+  useEffect(()=>{if(open&&user){loadConversations();const iv=setInterval(loadConversations,3000);return ()=>clearInterval(iv);}},[open,user]);
+
+  // Unread count polling always
+  useEffect(()=>{if(!user)return;loadUnread();const iv=setInterval(loadUnread,5000);return ()=>clearInterval(iv);},[user]);
+
+  // Message polling: 1.5s when in chat view
+  useEffect(()=>{
+    if(view!=='chat'||!partner)return;
+    let active=true;
+    const poll=async()=>{const d=await get('/messages/'+partner.partner_id);if(active&&d&&d.messages&&d.messages.length>0)setMessages(d.messages);};
+    poll();const iv=setInterval(poll,1500);
+    return ()=>{active=false;clearInterval(iv);};
+  },[view,partner]);
+
+  // Auto-scroll
+  useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[messages]);
+
+  if(!user)return null;
+  if(user.role==='admin')return null;
+
+  return(
+    <>
+      {/* Floating chat button */}
+      <button className="chat-btn" onClick={()=>{setOpen(!open);if(!open){loadConversations();loadUnread();}}}
+        onMouseEnter={e=>e.currentTarget.style.transform='scale(1.08)'}
+        onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
+        {open?<span style={{fontSize:24,lineHeight:1}}>×</span>:<><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></>}
+        {!open&&unreadTotal>0&&<span style={{position:'absolute',top:-6,right:-6,background:'#ff3b30',color:'white',borderRadius:'50%',minWidth:23,height:23,fontSize:11,fontWeight:800,display:'grid',placeItems:'center',border:'2px solid white',padding:'0 5px'}}>{unreadTotal>99?'99+':unreadTotal}</span>}
+      </button>
+
+      {/* Chat panel */}
+      {open&&(
+        <div style={{position:'fixed',right:'1rem',bottom:'5rem',zIndex:999,width:'calc(100vw - 2rem)',maxWidth:'390px',maxHeight:'70vh',background:'white',borderRadius:20,boxShadow:'0 20px 60px rgba(0,0,0,.2)',border:'1px solid #e5e9ef',display:'flex',flexDirection:'column',overflow:'hidden',animation:'chatIn .25s ease'}}>
+          <style>{`@keyframes chatIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}`}</style>
+
+          {/* Header */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'#087a3a',color:'white'}}>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              {view==='chat'&&<button onClick={backToConvs} style={{background:'rgba(255,255,255,.15)',border:'none',color:'white',borderRadius:'50%',width:32,height:32,display:'grid',placeItems:'center',cursor:'pointer',fontSize:16}}>←</button>}
+              {view==='chat'&&partner?(
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,.2)',display:'grid',placeItems:'center',color:'white',fontSize:15,fontWeight:700}}>{partner.partner_name?.[0]?.toUpperCase()||'?'}</div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,lineHeight:1.1}}>{partner.partner_name||'Chat'}</div>
+                    <div style={{fontSize:10,opacity:.7}}>Online</div>
+                  </div>
+                </div>
+              ):(
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,.2)',display:'grid',placeItems:'center',fontSize:16}}>💬</div>
+                  <div style={{fontWeight:700,fontSize:15}}>Messages</div>
+                </div>
+              )}
+            </div>
+            <button onClick={()=>setOpen(false)} style={{background:'rgba(255,255,255,.15)',border:'none',color:'white',borderRadius:'50%',width:32,height:32,display:'grid',placeItems:'center',cursor:'pointer',fontSize:18,fontWeight:300}}>×</button>
+          </div>
+
+          {/* Conversations list */}
+          {view==='conversations'&&(
+            <div style={{overflow:'auto',flex:1,background:'#fafafa'}}>
+              {convs.length===0?(
+                <div style={{textAlign:'center',padding:48,color:'#999'}}>
+                  <div style={{fontSize:48,marginBottom:12}}>💬</div>
+                  <div style={{fontWeight:600,fontSize:14,color:'#555',marginBottom:6}}>No messages yet</div>
+                  <div style={{fontSize:12}}>Browse products and click "Chat" to start a conversation</div>
+                </div>
+              ):convs.map(c=>(
+                <div key={c.partner_id} onClick={()=>openChat(c)}
+                  style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',cursor:'pointer',borderBottom:'1px solid #f0f0f0',transition:'background .15s',background:'white'}}
+                  onMouseEnter={e=>e.currentTarget.style.background='#f4fbf6'}
+                  onMouseLeave={e=>e.currentTarget.style.background='white'}>
+                  <div style={{position:'relative',flexShrink:0}}>
+                    <div style={{width:44,height:44,borderRadius:'50%',background:'linear-gradient(135deg,#087a3a,#0aab50)',display:'grid',placeItems:'center',color:'white',fontSize:17,fontWeight:700}}>{c.partner_name?.[0]?.toUpperCase()||'?'}</div>
+                    <div style={{position:'absolute',bottom:1,right:1,width:12,height:12,borderRadius:'50%',background:'#4caf50',border:'2px solid white'}}/>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                      <span style={{fontWeight:700,fontSize:13.5,color:'#101820'}}>{c.partner_name}</span>
+                      <span style={{fontSize:10.5,color:'#999',flexShrink:0,marginLeft:8}}>{fmtChatTime(c.last_time)}</span>
+                    </div>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:3}}>
+                      <span style={{fontSize:12.5,color:'#888',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{c.last_message||'Start a conversation'}</span>
+                      {c.unread>0&&<span style={{background:'#087a3a',color:'white',borderRadius:'50%',minWidth:20,height:20,fontSize:10.5,fontWeight:700,display:'grid',placeItems:'center',flexShrink:0,marginLeft:6,padding:'0 4px'}}>{c.unread}</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Chat view */}
+          {view==='chat'&&partner&&(
+            <>
+              <div ref={chatRef} style={{flex:1,overflow:'auto',padding:'12px 14px',background:'#e8eef5',backgroundImage:'linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px)',backgroundSize:'100% 24px',display:'flex',flexDirection:'column',gap:3}}>
+                {messages.length===0&&(
+                  <div style={{textAlign:'center',padding:40,color:'#999',fontSize:13}}>
+                    <div style={{fontSize:36,marginBottom:8}}>👋</div>
+                    <div>No messages yet. Say hello!</div>
+                  </div>
+                )}
+                {messages.map((m,i)=>{
+                  const isMine=m.sender_id===user.id;
+                  const showDateSep=needsDateSep(messages,i);
+                  return(
+                    <React.Fragment key={m.id||i}>
+                      {showDateSep&&(
+                        <div style={{display:'flex',justifyContent:'center',margin:'12px 0 8px'}}>
+                          <span style={{background:'rgba(255,255,255,.85)',color:'#666',fontSize:11,fontWeight:600,padding:'4px 14px',borderRadius:20,boxShadow:'0 1px 3px rgba(0,0,0,.08)'}}>{dateSepLabel(m.created_at)}</span>
+                        </div>
+                      )}
+                      <div style={{display:'flex',flexDirection:'column',alignItems:isMine?'flex-end':'flex-start',marginBottom:2}}>
+                        {!isMine&&<span style={{fontSize:10,fontWeight:700,color:'#555',marginLeft:12,marginBottom:1}}>{m.sender_name||'User'}</span>}
+                        <div style={{maxWidth:'82%',padding:'8px 13px',borderRadius:16,borderTopRightRadius:isMine?4:16,borderTopLeftRadius:isMine?16:4,background:isMine?'#d1f0d9':'white',color:'#101820',boxShadow:'0 1px 2px rgba(0,0,0,.06)',position:'relative'}}>
+                          <div style={{fontSize:13.5,lineHeight:1.45,wordBreak:'break-word'}}>{m.message}</div>
+                          <div style={{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:4,marginTop:3}}>
+                            <span style={{fontSize:10,color:'#888'}}>{fmtMsgTime(m.created_at)}</span>
+                            {isMine&&<span style={{color:'#34b759',fontSize:11}}>✓</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              {sendErr&&<div style={{padding:'8px 14px',background:'#fff5f5',borderTop:'1px solid #fca5a5',color:'#d92d20',fontSize:11.5,textAlign:'center',animation:'chatIn .2s ease'}}>⚠ {sendErr}</div>}
+              <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',borderTop:'1px solid #e5e9ef',background:'white'}}>
+                <input ref={inputRef} value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}}
+                  placeholder="Type a message..." style={{flex:1,border:'1.5px solid #e0e0e0',borderRadius:24,padding:'10px 16px',fontSize:13.5,outline:'none',background:'#f5f5f5',transition:'border-color .2s'}}
+                  onFocus={e=>{e.target.style.borderColor='#087a3a';e.target.style.background='white';}}
+                  onBlur={e=>{e.target.style.borderColor='#e0e0e0';e.target.style.background='#f5f5f5';}}
+                  disabled={sending}/>
+                <button onClick={sendMessage} disabled={sending||!text.trim()}
+                  style={{width:40,height:40,borderRadius:'50%',background:sending||!text.trim()?'#ccc':'#087a3a',color:'white',border:'none',display:'grid',placeItems:'center',cursor:sending||!text.trim()?'default':'pointer',transition:'all .2s',flexShrink:0}}>
+                  {sending?<span style={{fontSize:14}}>⏳</span>:<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
 // App
 function App(){
   const[page,setPage]=useState('Home');
   const[sharedBasket,setSharedBasket]=useState([]);
+  const[autoLogging,setAutoLogging]=useState(false);
+  const[autoLoginFailed,setAutoLoginFailed]=useState(false);
   const[user,setUser]=useState(()=>{
-    // Store full user object separately since JWT payload lacks name field
+    // Restore user from localStorage if token is still valid
     const stored=localStorage.getItem('sp_user');
     const t=localStorage.getItem('sp_token');
     if(!stored||!t)return null;
     try{
       const p=JSON.parse(atob(t.split('.')[0]));
-      if(p.exp<Date.now()/1000){localStorage.removeItem('sp_token');localStorage.removeItem('sp_user');return null;}
+      if(p.exp<Date.now()/1000)return null; // expired → will auto-login
       return JSON.parse(stored);
     }catch{return null;}
   });
-  const logout=()=>{localStorage.removeItem('sp_token');localStorage.removeItem('sp_user');setUser(null);setPage('Home');};
+
+  // Show spinner during initial render if we have saved creds but no valid user (prevents flash of login page)
+  const needsAutoLogin = !user && !autoLoginFailed && !!localStorage.getItem('sp_creds');
+  const showSpinner = autoLogging || needsAutoLogin;
+
+  // Auto-login with saved credentials when token is expired or missing
+  useEffect(()=>{
+    if(user)return;                                    // already logged in
+    if(autoLogging)return;                             // already trying
+    const creds=localStorage.getItem('sp_creds');
+    if(!creds)return;                                  // no saved credentials
+    try{
+      const dec=atob(creds);
+      const idx=dec.indexOf(':');
+      if(idx===-1)return;
+      const email=dec.slice(0,idx),pw=dec.slice(idx+1);
+      setAutoLogging(true);
+      fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})})
+        .then(r=>r.json()).then(r=>{
+          if(!r.token){setAutoLogging(false);setAutoLoginFailed(true);return;}
+          localStorage.setItem('sp_token',r.token);
+          localStorage.setItem('sp_user',JSON.stringify(r.user));
+          setUser(r.user);
+          setAutoLogging(false);
+        }).catch(()=>{setAutoLogging(false);setAutoLoginFailed(true);});
+    }catch{setAutoLogging(false);setAutoLoginFailed(true);}
+  },[user,autoLogging]);
+
+  const logout=()=>{localStorage.removeItem('sp_token');localStorage.removeItem('sp_user');localStorage.removeItem('sp_creds');setUser(null);setIsAdmin(false);setAutoLoginFailed(false);location.hash='';setPage('Home');};
 
   // Admin only via hash, never shown in nav
-  const[isAdmin,setIsAdmin]=useState(false);
+  const[isAdmin,setIsAdmin]=useState(()=>{
+    // Compute immediately on mount so refresh at #admin doesn't flash Home
+    if(location.hash!=='#admin')return false;
+    const stored=localStorage.getItem('sp_user');
+    const t=localStorage.getItem('sp_token');
+    if(!stored||!t)return false;
+    try{
+      const p=JSON.parse(atob(t.split('.')[0]));
+      if(p.exp<Date.now()/1000)return false;
+      const u=JSON.parse(stored);
+      return u.role==='admin';
+    }catch{return false;}
+  });
   useEffect(()=>{
     const check=()=>setIsAdmin(location.hash==='#admin'&&user?.role==='admin');
     check();addEventListener('hashchange',check);return()=>removeEventListener('hashchange',check);
   },[user]);
 
+  // Derived synchronously every render so #admin never flashes the wrong page,
+  // even when isAdmin state hasn't caught up (e.g. right after auto-login completes).
+  const isAdminEffective = isAdmin || (location.hash === '#admin' && user?.role === 'admin');
+
   const PAGES={Home,Pricing,Markets,'Cost Estimator':CostEstimator,Sellers,Alerts,About,Login,Register};
 
   const renderPage=()=>{
-    if(isAdmin)return <Admin/>;
+    if(isAdminEffective)return <Admin/>;
     const P=PAGES[page]||Home;
     if(page==='Markets')return <P basketItems={sharedBasket} setPage={setPage}/>;
     if(page==='Cost Estimator')return <P setPage={setPage} setSharedBasket={setSharedBasket}/>;
@@ -1161,9 +1574,11 @@ function App(){
 
   return(
     <AuthCtx.Provider value={{user,setUser,logout}}>
-      <Layout page={isAdmin?'Admin':page} setPage={p=>{location.hash='';setPage(p);}}>
+      {showSpinner?<div style={{minHeight:'100vh',display:'grid',placeItems:'center',background:'#f4fbf6'}}><Spinner/></div>:
+      <Layout page={isAdminEffective?'Admin':page} setPage={p=>{location.hash=p==='Admin'?'#admin':'';setPage(p);}}>
         {renderPage()}
-      </Layout>
+        <ChatWidget/>
+      </Layout>}
     </AuthCtx.Provider>
   );
 }

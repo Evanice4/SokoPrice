@@ -73,6 +73,31 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_products_seller
             ON products(seller_id);
+
+        CREATE TABLE IF NOT EXISTS messages (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender_id   INTEGER NOT NULL REFERENCES users(id),
+            receiver_id INTEGER NOT NULL REFERENCES users(id),
+            product_id  INTEGER REFERENCES products(id),
+            message     TEXT NOT NULL,
+            read        INTEGER NOT NULL DEFAULT 0,
+            created_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_messages_users
+            ON messages(sender_id, receiver_id);
+
+        CREATE TABLE IF NOT EXISTS pending_price_submissions (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            seller_id   INTEGER NOT NULL REFERENCES users(id),
+            commodity   TEXT NOT NULL,
+            market      TEXT NOT NULL,
+            price_rwf   REAL NOT NULL,
+            price_date  TEXT NOT NULL,
+            status      TEXT NOT NULL DEFAULT 'pending',
+            reviewed_by INTEGER REFERENCES users(id),
+            created_at  TEXT NOT NULL
+        );
     """)
 
     # Seed admin user if not exists
