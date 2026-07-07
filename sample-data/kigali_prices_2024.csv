@@ -1,0 +1,1001 @@
+commodity,market,price_rwf,price_date
+Cabbage,Kigali City Market,434,2024-01-01
+Bananas,Kigali City Market,639,2024-01-01
+Beans (Dry),Kimisagara,1183,2024-01-02
+Beans (Dry),Kicukiro,1298,2024-01-02
+Beans (Dry),Kicukiro,1295,2024-01-04
+Beans (Dry),Kimisagara,1166,2024-01-05
+Cabbage,Nyabugogo,390,2024-01-05
+Maize Flour,Nyabugogo,3679,2024-01-05
+Potatoes,Kimisagara,723,2024-01-05
+Potatoes,Kigali City Market,836,2024-01-05
+Sorghum,Kicukiro,730,2024-01-06
+Maize,Nyabugogo,507,2024-01-07
+Flour,Kigali City Market,3861,2024-01-07
+Rice,Nyabugogo,10662,2024-01-08
+Rice,Nyabugogo,9763,2024-01-09
+Sorghum,Kimironko,735,2024-01-10
+Flour,Kicukiro,3626,2024-01-11
+Potatoes,Kicukiro,867,2024-01-11
+Sorghum,Nyabugogo,689,2024-01-13
+Cabbage,Nyabugogo,397,2024-01-13
+Flour,Kicukiro,3883,2024-01-14
+Maize Flour,Kicukiro,4190,2024-01-15
+Flour,Kicukiro,3845,2024-01-15
+Beans (Dry),Nyabugogo,1152,2024-01-16
+Maize Flour,Kimironko,3876,2024-01-17
+Maize Flour,Kicukiro,4072,2024-01-17
+Sorghum,Nyabugogo,643,2024-01-17
+Beans (Dry),Kimisagara,1169,2024-01-17
+Sorghum,Kigali City Market,765,2024-01-18
+Beans (Dry),Nyabugogo,1201,2024-01-19
+Bananas,Kigali City Market,646,2024-01-19
+Flour,Kigali City Market,4038,2024-01-19
+Bananas,Nyabugogo,627,2024-01-20
+Rice,Kicukiro,11433,2024-01-21
+Spinach,Nyabugogo,323,2024-01-21
+Maize,Kimironko,538,2024-01-21
+Maize,Kimisagara,514,2024-01-22
+Flour,Kimisagara,3537,2024-01-22
+Cabbage,Kimisagara,395,2024-01-22
+Cabbage,Kimisagara,393,2024-01-23
+Sorghum,Kimironko,745,2024-01-23
+Cabbage,Kimironko,435,2024-01-24
+Bananas,Nyabugogo,642,2024-01-24
+Potatoes,Kimironko,873,2024-01-25
+Bananas,Nyabugogo,623,2024-01-25
+Beans (Dry),Kicukiro,1291,2024-01-25
+Maize Flour,Kimironko,4089,2024-01-25
+Beans (Dry),Kimironko,1312,2024-01-26
+Spinach,Kicukiro,344,2024-01-26
+Flour,Nyabugogo,3552,2024-01-26
+Rice,Kicukiro,11043,2024-01-26
+Bananas,Kimironko,680,2024-01-27
+Rice,Kicukiro,11481,2024-01-27
+Flour,Kicukiro,3806,2024-01-27
+Potatoes,Nyabugogo,837,2024-01-27
+Cabbage,Kigali City Market,452,2024-01-27
+Spinach,Kigali City Market,337,2024-01-27
+Sorghum,Kicukiro,738,2024-01-29
+Rice,Kimironko,10899,2024-01-29
+Cabbage,Kimironko,435,2024-01-29
+Cabbage,Nyabugogo,445,2024-01-29
+Potatoes,Kicukiro,855,2024-01-29
+Flour,Nyabugogo,3713,2024-01-29
+Potatoes,Kigali City Market,867,2024-01-29
+Beans (Dry),Kicukiro,1301,2024-01-30
+Bananas,Kimironko,656,2024-01-30
+Bananas,Kigali City Market,723,2024-01-30
+Flour,Kimironko,3734,2024-01-31
+Maize,Kigali City Market,615,2024-01-31
+Flour,Kigali City Market,4152,2024-01-31
+Cabbage,Kimisagara,410,2024-01-31
+Beans (Dry),Nyabugogo,1210,2024-01-31
+Maize,Kicukiro,559,2024-02-01
+Bananas,Nyabugogo,623,2024-02-01
+Maize Flour,Kimisagara,3891,2024-02-01
+Spinach,Kimironko,336,2024-02-01
+Cabbage,Kimisagara,417,2024-02-01
+Beans (Dry),Kimisagara,1259,2024-02-02
+Bananas,Kicukiro,722,2024-02-03
+Bananas,Nyabugogo,612,2024-02-04
+Spinach,Kimisagara,324,2024-02-04
+Cabbage,Kigali City Market,478,2024-02-04
+Beans (Dry),Kimironko,1314,2024-02-04
+Bananas,Kimironko,680,2024-02-04
+Potatoes,Kigali City Market,890,2024-02-05
+Sorghum,Nyabugogo,685,2024-02-05
+Maize,Nyabugogo,522,2024-02-05
+Maize,Kimisagara,522,2024-02-05
+Spinach,Kimisagara,309,2024-02-05
+Maize,Kigali City Market,631,2024-02-06
+Spinach,Kimironko,355,2024-02-07
+Maize,Kigali City Market,582,2024-02-07
+Spinach,Kicukiro,356,2024-02-07
+Potatoes,Kimisagara,857,2024-02-07
+Beans (Dry),Kimironko,1297,2024-02-07
+Cabbage,Kimisagara,411,2024-02-08
+Cabbage,Nyabugogo,417,2024-02-08
+Maize,Nyabugogo,542,2024-02-08
+Rice,Nyabugogo,11018,2024-02-08
+Maize,Kimironko,577,2024-02-08
+Cabbage,Kicukiro,477,2024-02-08
+Flour,Kicukiro,4052,2024-02-08
+Bananas,Kimironko,685,2024-02-08
+Maize Flour,Kimironko,4009,2024-02-08
+Flour,Kicukiro,3922,2024-02-09
+Maize Flour,Kigali City Market,4314,2024-02-09
+Potatoes,Kigali City Market,936,2024-02-09
+Flour,Nyabugogo,3546,2024-02-09
+Sorghum,Kigali City Market,748,2024-02-09
+Beans (Dry),Kimironko,1332,2024-02-10
+Beans (Dry),Kicukiro,1371,2024-02-10
+Rice,Kicukiro,11700,2024-02-10
+Maize,Kimisagara,552,2024-02-11
+Rice,Nyabugogo,10319,2024-02-11
+Maize Flour,Kimironko,4110,2024-02-11
+Potatoes,Kimisagara,864,2024-02-12
+Maize Flour,Kimisagara,3802,2024-02-12
+Cabbage,Kicukiro,474,2024-02-13
+Rice,Kigali City Market,11885,2024-02-13
+Rice,Kimironko,11534,2024-02-13
+Spinach,Kicukiro,356,2024-02-14
+Maize Flour,Kimisagara,3943,2024-02-14
+Flour,Kicukiro,3962,2024-02-14
+Spinach,Kicukiro,349,2024-02-15
+Flour,Nyabugogo,3703,2024-02-16
+Sorghum,Kicukiro,789,2024-02-16
+Flour,Kigali City Market,4056,2024-02-16
+Cabbage,Kimisagara,435,2024-02-16
+Rice,Kicukiro,11509,2024-02-17
+Maize Flour,Nyabugogo,3917,2024-02-17
+Maize Flour,Kimisagara,3944,2024-02-17
+Flour,Kigali City Market,4172,2024-02-17
+Sorghum,Kimisagara,721,2024-02-17
+Flour,Kicukiro,4173,2024-02-17
+Bananas,Kicukiro,703,2024-02-18
+Maize,Kigali City Market,598,2024-02-18
+Sorghum,Kicukiro,781,2024-02-19
+Sorghum,Kimisagara,719,2024-02-19
+Potatoes,Kigali City Market,929,2024-02-19
+Spinach,Kimisagara,329,2024-02-19
+Rice,Kimironko,11041,2024-02-19
+Rice,Nyabugogo,10501,2024-02-20
+Maize Flour,Kimisagara,3876,2024-02-21
+Cabbage,Kigali City Market,514,2024-02-21
+Rice,Kicukiro,12213,2024-02-21
+Flour,Kimironko,4026,2024-02-21
+Maize Flour,Nyabugogo,3829,2024-02-22
+Maize Flour,Kimironko,4138,2024-02-22
+Sorghum,Kimironko,751,2024-02-22
+Maize Flour,Kigali City Market,4245,2024-02-22
+Cabbage,Kimironko,504,2024-02-22
+Cabbage,Kigali City Market,485,2024-02-23
+Cabbage,Kicukiro,497,2024-02-24
+Sorghum,Kimisagara,712,2024-02-24
+Bananas,Nyabugogo,676,2024-02-24
+Cabbage,Kimisagara,432,2024-02-25
+Potatoes,Kimisagara,888,2024-02-25
+Maize,Kimironko,591,2024-02-25
+Rice,Kicukiro,11472,2024-02-26
+Potatoes,Kicukiro,971,2024-02-27
+Cabbage,Kimironko,504,2024-02-27
+Maize Flour,Kigali City Market,4282,2024-02-27
+Spinach,Nyabugogo,354,2024-02-27
+Beans (Dry),Nyabugogo,1280,2024-02-28
+Potatoes,Kimironko,933,2024-02-28
+Maize,Nyabugogo,590,2024-02-29
+Bananas,Kigali City Market,758,2024-03-01
+Spinach,Nyabugogo,367,2024-03-01
+Rice,Kimisagara,10869,2024-03-01
+Spinach,Kimironko,384,2024-03-02
+Sorghum,Kigali City Market,837,2024-03-02
+Potatoes,Kimironko,968,2024-03-02
+Cabbage,Kicukiro,490,2024-03-04
+Rice,Kimironko,11441,2024-03-04
+Maize Flour,Kimisagara,3950,2024-03-05
+Maize Flour,Kimisagara,4071,2024-03-05
+Flour,Kigali City Market,4054,2024-03-05
+Rice,Nyabugogo,10527,2024-03-05
+Beans (Dry),Kimironko,1413,2024-03-06
+Cabbage,Kigali City Market,486,2024-03-06
+Cabbage,Kimisagara,472,2024-03-07
+Beans (Dry),Nyabugogo,1317,2024-03-07
+Spinach,Kicukiro,379,2024-03-08
+Maize Flour,Kicukiro,4523,2024-03-09
+Spinach,Kigali City Market,386,2024-03-09
+Maize Flour,Nyabugogo,4031,2024-03-09
+Maize Flour,Kigali City Market,4286,2024-03-10
+Maize Flour,Nyabugogo,3941,2024-03-11
+Flour,Kimironko,4076,2024-03-11
+Cabbage,Kimironko,518,2024-03-11
+Bananas,Kigali City Market,755,2024-03-11
+Spinach,Nyabugogo,342,2024-03-12
+Cabbage,Kimironko,507,2024-03-12
+Rice,Nyabugogo,11285,2024-03-12
+Flour,Kimironko,4073,2024-03-12
+Maize,Kimironko,583,2024-03-12
+Maize,Kimironko,589,2024-03-13
+Maize,Kimironko,597,2024-03-13
+Beans (Dry),Kicukiro,1447,2024-03-13
+Bananas,Kigali City Market,756,2024-03-13
+Sorghum,Kicukiro,810,2024-03-14
+Rice,Kigali City Market,11997,2024-03-14
+Flour,Kigali City Market,4216,2024-03-14
+Rice,Kimisagara,11188,2024-03-15
+Cabbage,Nyabugogo,463,2024-03-15
+Cabbage,Nyabugogo,455,2024-03-15
+Maize,Kicukiro,609,2024-03-15
+Beans (Dry),Kimironko,1452,2024-03-15
+Maize,Kimironko,595,2024-03-16
+Potatoes,Kimironko,932,2024-03-16
+Flour,Kigali City Market,4157,2024-03-17
+Flour,Kimironko,4036,2024-03-17
+Maize,Kicukiro,622,2024-03-18
+Potatoes,Kicukiro,978,2024-03-19
+Potatoes,Kimisagara,901,2024-03-19
+Maize Flour,Kicukiro,4290,2024-03-19
+Sorghum,Kimironko,739,2024-03-19
+Maize Flour,Kimisagara,4086,2024-03-20
+Spinach,Kimironko,402,2024-03-21
+Spinach,Kimisagara,354,2024-03-21
+Spinach,Kimisagara,337,2024-03-21
+Sorghum,Kimisagara,702,2024-03-22
+Flour,Kicukiro,4162,2024-03-22
+Flour,Nyabugogo,3624,2024-03-23
+Flour,Nyabugogo,3876,2024-03-24
+Maize Flour,Kicukiro,4285,2024-03-24
+Spinach,Kicukiro,411,2024-03-25
+Maize,Kimisagara,560,2024-03-25
+Sorghum,Nyabugogo,765,2024-03-25
+Spinach,Kimisagara,349,2024-03-25
+Bananas,Kigali City Market,743,2024-03-25
+Flour,Kigali City Market,4346,2024-03-26
+Beans (Dry),Kimisagara,1328,2024-03-26
+Beans (Dry),Kimironko,1455,2024-03-27
+Flour,Kigali City Market,4010,2024-03-27
+Potatoes,Kimisagara,851,2024-03-27
+Rice,Kigali City Market,11731,2024-03-28
+Potatoes,Kigali City Market,975,2024-03-28
+Maize Flour,Kimisagara,3769,2024-03-29
+Cabbage,Kimisagara,468,2024-03-30
+Potatoes,Nyabugogo,928,2024-03-30
+Maize,Kimironko,591,2024-03-30
+Maize,Kicukiro,602,2024-03-30
+Bananas,Nyabugogo,700,2024-03-30
+Cabbage,Kimisagara,460,2024-03-30
+Maize,Kimisagara,542,2024-03-30
+Bananas,Kimironko,763,2024-03-31
+Flour,Nyabugogo,3837,2024-04-02
+Beans (Dry),Kigali City Market,1487,2024-04-02
+Bananas,Nyabugogo,689,2024-04-02
+Beans (Dry),Kimironko,1439,2024-04-03
+Rice,Kimisagara,10662,2024-04-03
+Spinach,Kigali City Market,391,2024-04-04
+Maize,Kicukiro,596,2024-04-05
+Beans (Dry),Kicukiro,1477,2024-04-05
+Flour,Nyabugogo,3732,2024-04-06
+Cabbage,Kigali City Market,505,2024-04-06
+Maize,Kicukiro,640,2024-04-07
+Rice,Kimironko,11993,2024-04-07
+Spinach,Nyabugogo,382,2024-04-07
+Beans (Dry),Kimironko,1438,2024-04-07
+Maize Flour,Kicukiro,4503,2024-04-08
+Flour,Nyabugogo,3909,2024-04-08
+Maize,Nyabugogo,574,2024-04-08
+Rice,Kicukiro,11794,2024-04-09
+Sorghum,Kicukiro,814,2024-04-09
+Rice,Kicukiro,11814,2024-04-10
+Cabbage,Kigali City Market,514,2024-04-11
+Flour,Kimironko,3868,2024-04-12
+Sorghum,Kimironko,814,2024-04-12
+Sorghum,Kicukiro,778,2024-04-12
+Cabbage,Kigali City Market,502,2024-04-12
+Rice,Kimironko,11175,2024-04-12
+Cabbage,Kigali City Market,500,2024-04-13
+Sorghum,Nyabugogo,750,2024-04-13
+Rice,Kicukiro,11666,2024-04-14
+Cabbage,Kimisagara,472,2024-04-14
+Spinach,Kigali City Market,383,2024-04-15
+Spinach,Kigali City Market,393,2024-04-15
+Beans (Dry),Kicukiro,1545,2024-04-16
+Potatoes,Kigali City Market,1017,2024-04-16
+Beans (Dry),Kimisagara,1331,2024-04-16
+Rice,Kicukiro,12158,2024-04-17
+Flour,Kimisagara,3727,2024-04-17
+Beans (Dry),Kimisagara,1379,2024-04-17
+Maize Flour,Nyabugogo,3985,2024-04-17
+Sorghum,Kimisagara,705,2024-04-18
+Beans (Dry),Nyabugogo,1333,2024-04-18
+Beans (Dry),Kimisagara,1310,2024-04-18
+Maize,Kimisagara,544,2024-04-19
+Spinach,Kigali City Market,409,2024-04-19
+Bananas,Nyabugogo,699,2024-04-19
+Rice,Nyabugogo,11203,2024-04-19
+Maize Flour,Kicukiro,4198,2024-04-20
+Spinach,Kimisagara,365,2024-04-20
+Flour,Kimironko,4089,2024-04-21
+Beans (Dry),Kimisagara,1366,2024-04-21
+Cabbage,Nyabugogo,465,2024-04-22
+Cabbage,Nyabugogo,464,2024-04-22
+Rice,Kimisagara,10520,2024-04-22
+Flour,Nyabugogo,3664,2024-04-22
+Spinach,Nyabugogo,346,2024-04-22
+Sorghum,Kimisagara,745,2024-04-23
+Cabbage,Kigali City Market,516,2024-04-23
+Rice,Nyabugogo,11343,2024-04-23
+Rice,Kicukiro,12194,2024-04-23
+Maize,Kimironko,638,2024-04-24
+Flour,Kicukiro,4191,2024-04-24
+Cabbage,Kicukiro,522,2024-04-25
+Potatoes,Kicukiro,994,2024-04-25
+Beans (Dry),Kigali City Market,1444,2024-04-25
+Maize,Nyabugogo,581,2024-04-26
+Cabbage,Kigali City Market,528,2024-04-27
+Spinach,Nyabugogo,350,2024-04-27
+Beans (Dry),Kicukiro,1490,2024-04-28
+Potatoes,Kimisagara,841,2024-04-28
+Bananas,Kigali City Market,769,2024-04-28
+Potatoes,Kicukiro,987,2024-04-29
+Sorghum,Kigali City Market,808,2024-04-29
+Rice,Kigali City Market,11512,2024-04-29
+Rice,Kicukiro,12280,2024-04-30
+Rice,Kicukiro,12209,2024-04-30
+Maize Flour,Kicukiro,4575,2024-04-30
+Maize Flour,Kimisagara,3896,2024-04-30
+Sorghum,Kicukiro,778,2024-04-30
+Bananas,Nyabugogo,679,2024-05-01
+Potatoes,Nyabugogo,919,2024-05-01
+Flour,Nyabugogo,3825,2024-05-01
+Sorghum,Kicukiro,761,2024-05-01
+Spinach,Kicukiro,366,2024-05-02
+Maize,Nyabugogo,580,2024-05-02
+Bananas,Kigali City Market,724,2024-05-03
+Flour,Nyabugogo,3694,2024-05-03
+Flour,Kimironko,3945,2024-05-03
+Flour,Kicukiro,4005,2024-05-04
+Flour,Nyabugogo,3636,2024-05-04
+Potatoes,Kigali City Market,978,2024-05-04
+Sorghum,Kimisagara,715,2024-05-04
+Potatoes,Nyabugogo,900,2024-05-05
+Cabbage,Kimisagara,455,2024-05-05
+Maize,Nyabugogo,592,2024-05-05
+Spinach,Kicukiro,376,2024-05-05
+Cabbage,Kigali City Market,492,2024-05-06
+Cabbage,Kicukiro,485,2024-05-06
+Flour,Kimisagara,3705,2024-05-06
+Maize Flour,Kicukiro,4234,2024-05-06
+Sorghum,Kimisagara,691,2024-05-07
+Spinach,Kimironko,356,2024-05-07
+Spinach,Kimironko,383,2024-05-08
+Sorghum,Kimironko,787,2024-05-09
+Potatoes,Kicukiro,962,2024-05-10
+Sorghum,Nyabugogo,730,2024-05-10
+Potatoes,Nyabugogo,879,2024-05-11
+Beans (Dry),Kicukiro,1489,2024-05-12
+Sorghum,Nyabugogo,691,2024-05-12
+Flour,Nyabugogo,3892,2024-05-13
+Rice,Kimisagara,11194,2024-05-13
+Maize Flour,Kimironko,4163,2024-05-13
+Potatoes,Kigali City Market,956,2024-05-14
+Spinach,Kigali City Market,367,2024-05-15
+Maize Flour,Kimironko,4261,2024-05-15
+Flour,Kicukiro,4100,2024-05-15
+Spinach,Kimisagara,336,2024-05-15
+Maize Flour,Kimisagara,3836,2024-05-16
+Maize,Kimironko,583,2024-05-17
+Maize,Kigali City Market,594,2024-05-17
+Maize,Kicukiro,594,2024-05-17
+Cabbage,Kimisagara,416,2024-05-17
+Beans (Dry),Kicukiro,1380,2024-05-18
+Cabbage,Nyabugogo,427,2024-05-19
+Spinach,Kimisagara,321,2024-05-19
+Maize Flour,Nyabugogo,4129,2024-05-19
+Maize,Kigali City Market,604,2024-05-20
+Maize Flour,Kicukiro,4310,2024-05-20
+Cabbage,Kimironko,492,2024-05-20
+Beans (Dry),Kigali City Market,1370,2024-05-20
+Maize Flour,Nyabugogo,4121,2024-05-21
+Maize Flour,Nyabugogo,3760,2024-05-21
+Beans (Dry),Kicukiro,1375,2024-05-21
+Rice,Kimisagara,10615,2024-05-22
+Rice,Kimisagara,10970,2024-05-22
+Cabbage,Kicukiro,473,2024-05-22
+Flour,Nyabugogo,3664,2024-05-22
+Rice,Kigali City Market,12290,2024-05-22
+Spinach,Kicukiro,378,2024-05-22
+Spinach,Kimironko,354,2024-05-23
+Rice,Kicukiro,11203,2024-05-24
+Potatoes,Kimironko,876,2024-05-25
+Cabbage,Kicukiro,477,2024-05-25
+Beans (Dry),Nyabugogo,1265,2024-05-26
+Flour,Nyabugogo,3783,2024-05-26
+Potatoes,Kimisagara,845,2024-05-26
+Rice,Kimisagara,10132,2024-05-26
+Sorghum,Kigali City Market,806,2024-05-26
+Rice,Kimironko,11819,2024-05-28
+Beans (Dry),Kigali City Market,1398,2024-05-29
+Maize,Kimisagara,540,2024-05-29
+Flour,Kicukiro,3873,2024-05-29
+Beans (Dry),Kigali City Market,1444,2024-05-29
+Spinach,Kimironko,358,2024-05-29
+Bananas,Kimironko,654,2024-05-31
+Maize Flour,Kicukiro,4220,2024-05-31
+Maize Flour,Nyabugogo,3744,2024-05-31
+Maize Flour,Kimisagara,3679,2024-05-31
+Rice,Kimironko,11412,2024-05-31
+Bananas,Kicukiro,676,2024-05-31
+Rice,Kicukiro,11850,2024-06-01
+Spinach,Kimironko,327,2024-06-01
+Potatoes,Nyabugogo,852,2024-06-02
+Maize,Kimisagara,524,2024-06-02
+Maize Flour,Kimironko,3942,2024-06-02
+Bananas,Nyabugogo,643,2024-06-02
+Potatoes,Kicukiro,854,2024-06-02
+Maize Flour,Kigali City Market,4423,2024-06-03
+Cabbage,Kimironko,436,2024-06-03
+Rice,Kimisagara,10805,2024-06-03
+Spinach,Kicukiro,334,2024-06-03
+Beans (Dry),Nyabugogo,1214,2024-06-03
+Potatoes,Kicukiro,937,2024-06-03
+Flour,Kigali City Market,3993,2024-06-03
+Maize Flour,Kimisagara,3651,2024-06-04
+Beans (Dry),Nyabugogo,1282,2024-06-04
+Maize,Kigali City Market,579,2024-06-04
+Beans (Dry),Kicukiro,1414,2024-06-04
+Flour,Kigali City Market,3848,2024-06-05
+Potatoes,Kimironko,861,2024-06-05
+Bananas,Nyabugogo,629,2024-06-05
+Bananas,Kicukiro,697,2024-06-05
+Maize,Nyabugogo,524,2024-06-06
+Flour,Kigali City Market,4189,2024-06-06
+Sorghum,Kimisagara,695,2024-06-06
+Spinach,Kimisagara,309,2024-06-06
+Sorghum,Kimisagara,669,2024-06-06
+Maize,Kigali City Market,594,2024-06-08
+Potatoes,Kimisagara,787,2024-06-09
+Spinach,Nyabugogo,325,2024-06-09
+Beans (Dry),Kimisagara,1163,2024-06-10
+Sorghum,Kicukiro,715,2024-06-10
+Sorghum,Kimisagara,660,2024-06-10
+Maize Flour,Kicukiro,3994,2024-06-11
+Bananas,Nyabugogo,628,2024-06-11
+Maize,Nyabugogo,539,2024-06-12
+Spinach,Kimisagara,298,2024-06-13
+Spinach,Kigali City Market,338,2024-06-13
+Bananas,Nyabugogo,600,2024-06-13
+Maize,Kimironko,541,2024-06-14
+Rice,Kimironko,11570,2024-06-15
+Flour,Kigali City Market,3809,2024-06-15
+Beans (Dry),Kimisagara,1237,2024-06-15
+Spinach,Kigali City Market,321,2024-06-16
+Maize,Kigali City Market,602,2024-06-16
+Maize Flour,Nyabugogo,3893,2024-06-16
+Spinach,Kimisagara,288,2024-06-17
+Cabbage,Nyabugogo,391,2024-06-17
+Flour,Kicukiro,3976,2024-06-17
+Sorghum,Kimisagara,659,2024-06-17
+Bananas,Kigali City Market,681,2024-06-18
+Maize,Kimironko,580,2024-06-18
+Maize,Nyabugogo,536,2024-06-18
+Maize Flour,Kicukiro,4257,2024-06-19
+Maize,Nyabugogo,514,2024-06-19
+Cabbage,Kimisagara,394,2024-06-19
+Spinach,Kicukiro,337,2024-06-20
+Spinach,Kimironko,324,2024-06-21
+Flour,Kicukiro,3936,2024-06-21
+Flour,Kimironko,3810,2024-06-22
+Rice,Kimironko,10763,2024-06-22
+Sorghum,Nyabugogo,690,2024-06-22
+Maize,Kigali City Market,588,2024-06-22
+Spinach,Nyabugogo,308,2024-06-22
+Sorghum,Kigali City Market,760,2024-06-22
+Bananas,Kimironko,633,2024-06-23
+Maize,Nyabugogo,504,2024-06-23
+Sorghum,Nyabugogo,657,2024-06-23
+Rice,Kimisagara,9941,2024-06-23
+Cabbage,Kimironko,428,2024-06-24
+Sorghum,Kigali City Market,751,2024-06-24
+Potatoes,Kimironko,857,2024-06-24
+Bananas,Kimironko,623,2024-06-24
+Cabbage,Nyabugogo,403,2024-06-24
+Bananas,Kicukiro,627,2024-06-25
+Maize Flour,Nyabugogo,3858,2024-06-25
+Potatoes,Kimisagara,774,2024-06-25
+Cabbage,Kimisagara,381,2024-06-25
+Maize Flour,Kimironko,3959,2024-06-26
+Cabbage,Kigali City Market,448,2024-06-26
+Potatoes,Kimironko,853,2024-06-27
+Beans (Dry),Kimisagara,1125,2024-06-27
+Sorghum,Kigali City Market,704,2024-06-28
+Maize,Kimisagara,511,2024-06-28
+Sorghum,Kimisagara,668,2024-06-28
+Bananas,Kigali City Market,608,2024-06-29
+Potatoes,Nyabugogo,778,2024-06-29
+Flour,Kimisagara,3359,2024-06-29
+Bananas,Kimironko,618,2024-06-30
+Flour,Nyabugogo,3380,2024-06-30
+Cabbage,Kimisagara,363,2024-07-01
+Beans (Dry),Kigali City Market,1352,2024-07-02
+Flour,Nyabugogo,3469,2024-07-02
+Flour,Kigali City Market,3948,2024-07-03
+Maize Flour,Kicukiro,3978,2024-07-03
+Potatoes,Kicukiro,848,2024-07-04
+Sorghum,Nyabugogo,645,2024-07-05
+Sorghum,Kimironko,710,2024-07-05
+Cabbage,Kigali City Market,438,2024-07-06
+Sorghum,Kimisagara,610,2024-07-06
+Sorghum,Kigali City Market,688,2024-07-07
+Bananas,Kimisagara,546,2024-07-07
+Cabbage,Kigali City Market,402,2024-07-08
+Spinach,Nyabugogo,269,2024-07-08
+Spinach,Nyabugogo,259,2024-07-08
+Cabbage,Nyabugogo,360,2024-07-09
+Bananas,Kicukiro,579,2024-07-09
+Maize Flour,Kimisagara,3634,2024-07-09
+Flour,Kimironko,3748,2024-07-09
+Flour,Kigali City Market,3899,2024-07-10
+Rice,Kimisagara,9595,2024-07-11
+Maize Flour,Nyabugogo,3686,2024-07-11
+Cabbage,Kimironko,387,2024-07-12
+Spinach,Kigali City Market,280,2024-07-12
+Cabbage,Kicukiro,398,2024-07-12
+Spinach,Kicukiro,290,2024-07-13
+Cabbage,Kicukiro,390,2024-07-13
+Flour,Nyabugogo,3503,2024-07-13
+Bananas,Kicukiro,560,2024-07-13
+Spinach,Kigali City Market,290,2024-07-14
+Cabbage,Kigali City Market,399,2024-07-14
+Cabbage,Kigali City Market,404,2024-07-14
+Bananas,Kimisagara,510,2024-07-14
+Spinach,Kicukiro,285,2024-07-14
+Bananas,Kimisagara,501,2024-07-15
+Rice,Nyabugogo,9734,2024-07-15
+Bananas,Kigali City Market,566,2024-07-15
+Spinach,Nyabugogo,267,2024-07-15
+Cabbage,Kigali City Market,412,2024-07-15
+Potatoes,Nyabugogo,751,2024-07-15
+Bananas,Nyabugogo,510,2024-07-15
+Potatoes,Kicukiro,777,2024-07-16
+Beans (Dry),Kimironko,1177,2024-07-16
+Potatoes,Kimironko,790,2024-07-16
+Maize Flour,Kigali City Market,3914,2024-07-17
+Potatoes,Kicukiro,738,2024-07-17
+Potatoes,Kicukiro,750,2024-07-17
+Sorghum,Nyabugogo,663,2024-07-17
+Sorghum,Kigali City Market,695,2024-07-18
+Rice,Kimironko,10453,2024-07-18
+Flour,Kimisagara,3443,2024-07-19
+Maize Flour,Kigali City Market,3920,2024-07-19
+Flour,Kigali City Market,3867,2024-07-20
+Potatoes,Kigali City Market,799,2024-07-20
+Maize Flour,Kicukiro,4083,2024-07-20
+Cabbage,Kigali City Market,412,2024-07-20
+Potatoes,Kimisagara,674,2024-07-21
+Beans (Dry),Kimironko,1173,2024-07-21
+Maize,Kicukiro,535,2024-07-21
+Flour,Kicukiro,3683,2024-07-21
+Maize,Kimisagara,466,2024-07-21
+Beans (Dry),Kicukiro,1158,2024-07-22
+Beans (Dry),Kicukiro,1216,2024-07-22
+Beans (Dry),Kicukiro,1227,2024-07-23
+Maize,Kigali City Market,526,2024-07-24
+Maize Flour,Kimisagara,3510,2024-07-24
+Potatoes,Kimironko,777,2024-07-24
+Rice,Kimisagara,9885,2024-07-24
+Cabbage,Kimironko,379,2024-07-24
+Bananas,Kimironko,557,2024-07-24
+Maize,Kigali City Market,535,2024-07-25
+Maize,Kigali City Market,515,2024-07-26
+Beans (Dry),Kimisagara,1020,2024-07-26
+Cabbage,Kimisagara,339,2024-07-26
+Beans (Dry),Kigali City Market,1219,2024-07-26
+Flour,Kimisagara,3261,2024-07-26
+Cabbage,Kimisagara,353,2024-07-26
+Potatoes,Kigali City Market,795,2024-07-27
+Cabbage,Kicukiro,379,2024-07-27
+Cabbage,Kimisagara,356,2024-07-27
+Bananas,Kicukiro,548,2024-07-28
+Bananas,Kimisagara,496,2024-07-28
+Cabbage,Kigali City Market,377,2024-07-28
+Beans (Dry),Nyabugogo,1040,2024-07-29
+Sorghum,Kimironko,680,2024-07-29
+Bananas,Kicukiro,556,2024-07-29
+Beans (Dry),Kimironko,1186,2024-07-29
+Spinach,Kicukiro,259,2024-07-30
+Spinach,Kicukiro,251,2024-07-30
+Flour,Kimironko,3760,2024-07-30
+Cabbage,Kicukiro,367,2024-07-31
+Bananas,Kimironko,521,2024-07-31
+Potatoes,Kimisagara,653,2024-08-01
+Cabbage,Kigali City Market,391,2024-08-02
+Bananas,Nyabugogo,486,2024-08-02
+Bananas,Kimironko,499,2024-08-02
+Maize Flour,Kigali City Market,4011,2024-08-03
+Maize Flour,Kimisagara,3449,2024-08-04
+Flour,Kimisagara,3300,2024-08-05
+Rice,Kimironko,10362,2024-08-05
+Sorghum,Nyabugogo,598,2024-08-06
+Potatoes,Nyabugogo,693,2024-08-07
+Cabbage,Kicukiro,350,2024-08-07
+Beans (Dry),Kimironko,1131,2024-08-08
+Maize,Kimironko,472,2024-08-08
+Flour,Kicukiro,3564,2024-08-09
+Spinach,Nyabugogo,217,2024-08-10
+Maize Flour,Kimironko,3708,2024-08-10
+Flour,Kicukiro,3825,2024-08-10
+Spinach,Kimironko,245,2024-08-10
+Maize,Nyabugogo,448,2024-08-11
+Sorghum,Kimisagara,578,2024-08-11
+Beans (Dry),Kigali City Market,1155,2024-08-12
+Spinach,Kimironko,244,2024-08-12
+Beans (Dry),Kimisagara,983,2024-08-13
+Cabbage,Kigali City Market,362,2024-08-14
+Flour,Kicukiro,3814,2024-08-14
+Maize Flour,Nyabugogo,3629,2024-08-14
+Beans (Dry),Kicukiro,1141,2024-08-14
+Maize Flour,Kimironko,3638,2024-08-15
+Sorghum,Kimironko,655,2024-08-15
+Potatoes,Kimisagara,612,2024-08-15
+Cabbage,Nyabugogo,318,2024-08-17
+Cabbage,Kigali City Market,361,2024-08-17
+Potatoes,Nyabugogo,679,2024-08-17
+Sorghum,Kicukiro,650,2024-08-18
+Beans (Dry),Kigali City Market,1162,2024-08-18
+Maize Flour,Kicukiro,3775,2024-08-18
+Maize,Kigali City Market,518,2024-08-18
+Rice,Kimironko,10131,2024-08-19
+Bananas,Kicukiro,501,2024-08-20
+Rice,Kimironko,10849,2024-08-20
+Beans (Dry),Kicukiro,1108,2024-08-20
+Rice,Kimironko,10555,2024-08-20
+Potatoes,Kimironko,676,2024-08-21
+Rice,Kicukiro,11131,2024-08-21
+Beans (Dry),Kimironko,1041,2024-08-22
+Potatoes,Kimironko,667,2024-08-22
+Beans (Dry),Kimironko,1091,2024-08-22
+Spinach,Kigali City Market,239,2024-08-22
+Beans (Dry),Kicukiro,1127,2024-08-23
+Bananas,Nyabugogo,435,2024-08-23
+Maize Flour,Kimironko,3825,2024-08-23
+Cabbage,Kigali City Market,370,2024-08-24
+Cabbage,Kigali City Market,356,2024-08-25
+Flour,Kigali City Market,3728,2024-08-25
+Bananas,Kigali City Market,494,2024-08-25
+Bananas,Kigali City Market,499,2024-08-25
+Beans (Dry),Kimironko,1058,2024-08-26
+Beans (Dry),Kicukiro,1066,2024-08-26
+Maize Flour,Kimironko,3491,2024-08-27
+Beans (Dry),Kimisagara,978,2024-08-27
+Rice,Nyabugogo,10084,2024-08-28
+Sorghum,Nyabugogo,607,2024-08-28
+Flour,Kimisagara,3095,2024-08-28
+Bananas,Kimironko,493,2024-08-28
+Rice,Kicukiro,10452,2024-08-28
+Flour,Kimironko,3666,2024-08-29
+Potatoes,Kimironko,671,2024-08-29
+Rice,Kigali City Market,11066,2024-08-29
+Beans (Dry),Nyabugogo,1021,2024-08-29
+Rice,Kimisagara,9168,2024-08-30
+Maize Flour,Kimironko,3776,2024-08-30
+Potatoes,Kimironko,654,2024-08-30
+Cabbage,Kigali City Market,344,2024-08-30
+Potatoes,Kigali City Market,677,2024-08-31
+Maize Flour,Kigali City Market,3778,2024-08-31
+Beans (Dry),Kimisagara,998,2024-08-31
+Sorghum,Kimisagara,582,2024-08-31
+Maize Flour,Kicukiro,3684,2024-08-31
+Cabbage,Kicukiro,335,2024-08-31
+Cabbage,Kigali City Market,335,2024-09-01
+Maize Flour,Kimironko,3612,2024-09-01
+Rice,Kicukiro,10037,2024-09-01
+Rice,Kimironko,10233,2024-09-01
+Sorghum,Kimironko,657,2024-09-01
+Potatoes,Nyabugogo,598,2024-09-02
+Bananas,Kigali City Market,495,2024-09-02
+Rice,Kigali City Market,10390,2024-09-02
+Flour,Kicukiro,3755,2024-09-04
+Rice,Kimisagara,9482,2024-09-04
+Sorghum,Kicukiro,644,2024-09-04
+Rice,Kimironko,10211,2024-09-04
+Rice,Kimisagara,9371,2024-09-04
+Sorghum,Kimironko,613,2024-09-04
+Bananas,Kimironko,482,2024-09-04
+Bananas,Kimironko,453,2024-09-05
+Flour,Kicukiro,3583,2024-09-05
+Maize,Kigali City Market,492,2024-09-06
+Potatoes,Kigali City Market,690,2024-09-06
+Rice,Kigali City Market,10924,2024-09-07
+Spinach,Kicukiro,218,2024-09-07
+Spinach,Kimisagara,194,2024-09-07
+Cabbage,Nyabugogo,326,2024-09-07
+Sorghum,Kigali City Market,657,2024-09-07
+Potatoes,Kicukiro,651,2024-09-07
+Spinach,Kimironko,213,2024-09-08
+Maize Flour,Kimisagara,3374,2024-09-09
+Cabbage,Nyabugogo,318,2024-09-09
+Potatoes,Kigali City Market,662,2024-09-11
+Cabbage,Kicukiro,327,2024-09-11
+Beans (Dry),Kigali City Market,1096,2024-09-11
+Sorghum,Nyabugogo,602,2024-09-11
+Cabbage,Kigali City Market,324,2024-09-12
+Maize,Kigali City Market,485,2024-09-15
+Bananas,Kigali City Market,451,2024-09-15
+Bananas,Nyabugogo,407,2024-09-15
+Potatoes,Kicukiro,693,2024-09-16
+Maize,Kigali City Market,477,2024-09-16
+Cabbage,Kimisagara,286,2024-09-16
+Potatoes,Kimironko,622,2024-09-17
+Maize Flour,Nyabugogo,3321,2024-09-17
+Maize Flour,Nyabugogo,3562,2024-09-17
+Spinach,Kigali City Market,225,2024-09-17
+Maize,Kimironko,480,2024-09-17
+Bananas,Kimironko,468,2024-09-18
+Maize,Kimisagara,425,2024-09-18
+Potatoes,Nyabugogo,614,2024-09-18
+Maize,Kicukiro,472,2024-09-18
+Bananas,Nyabugogo,406,2024-09-19
+Spinach,Kimisagara,197,2024-09-19
+Spinach,Kimisagara,187,2024-09-19
+Rice,Kigali City Market,10895,2024-09-20
+Cabbage,Kimisagara,298,2024-09-20
+Maize Flour,Kigali City Market,3679,2024-09-20
+Potatoes,Kimironko,679,2024-09-20
+Potatoes,Kicukiro,686,2024-09-21
+Bananas,Kimironko,430,2024-09-21
+Flour,Kigali City Market,3499,2024-09-21
+Flour,Kicukiro,3649,2024-09-22
+Flour,Kicukiro,3666,2024-09-24
+Beans (Dry),Kigali City Market,1120,2024-09-25
+Bananas,Kimironko,464,2024-09-25
+Flour,Kigali City Market,3500,2024-09-25
+Maize,Kigali City Market,464,2024-09-25
+Sorghum,Kimironko,644,2024-09-26
+Cabbage,Nyabugogo,313,2024-09-26
+Maize Flour,Kicukiro,3839,2024-09-27
+Flour,Kimironko,3438,2024-09-28
+Bananas,Nyabugogo,418,2024-09-28
+Rice,Nyabugogo,9258,2024-09-28
+Bananas,Nyabugogo,421,2024-09-28
+Sorghum,Kimisagara,580,2024-09-30
+Beans (Dry),Kicukiro,1026,2024-09-30
+Rice,Kimisagara,9933,2024-09-30
+Sorghum,Kicukiro,609,2024-10-01
+Potatoes,Kimisagara,592,2024-10-01
+Maize,Kicukiro,454,2024-10-01
+Sorghum,Nyabugogo,575,2024-10-01
+Flour,Kimisagara,3349,2024-10-01
+Spinach,Kimisagara,193,2024-10-02
+Bananas,Nyabugogo,420,2024-10-02
+Cabbage,Kicukiro,337,2024-10-02
+Sorghum,Nyabugogo,613,2024-10-02
+Potatoes,Kimironko,626,2024-10-03
+Bananas,Kimisagara,395,2024-10-04
+Flour,Kimisagara,3138,2024-10-04
+Potatoes,Nyabugogo,635,2024-10-05
+Spinach,Kimisagara,203,2024-10-05
+Bananas,Kimisagara,426,2024-10-05
+Spinach,Kigali City Market,228,2024-10-05
+Cabbage,Kicukiro,341,2024-10-05
+Potatoes,Kimisagara,613,2024-10-07
+Sorghum,Kicukiro,647,2024-10-08
+Beans (Dry),Nyabugogo,966,2024-10-08
+Spinach,Kimironko,221,2024-10-08
+Maize,Kimisagara,410,2024-10-08
+Cabbage,Kimisagara,285,2024-10-09
+Flour,Nyabugogo,3424,2024-10-09
+Potatoes,Kigali City Market,694,2024-10-09
+Potatoes,Kicukiro,671,2024-10-09
+Beans (Dry),Kicukiro,1041,2024-10-09
+Maize,Kimisagara,407,2024-10-09
+Beans (Dry),Kicukiro,1056,2024-10-09
+Maize Flour,Kimironko,3686,2024-10-10
+Maize Flour,Kicukiro,3853,2024-10-10
+Beans (Dry),Nyabugogo,952,2024-10-10
+Rice,Nyabugogo,9627,2024-10-10
+Sorghum,Kigali City Market,642,2024-10-10
+Flour,Nyabugogo,3205,2024-10-10
+Cabbage,Kimironko,337,2024-10-10
+Sorghum,Kigali City Market,645,2024-10-10
+Maize Flour,Kicukiro,3649,2024-10-10
+Bananas,Kimisagara,402,2024-10-10
+Maize,Kimisagara,422,2024-10-10
+Potatoes,Kimisagara,581,2024-10-11
+Maize Flour,Nyabugogo,3395,2024-10-12
+Flour,Kimironko,3657,2024-10-12
+Beans (Dry),Kimisagara,931,2024-10-12
+Potatoes,Kigali City Market,670,2024-10-12
+Beans (Dry),Kimisagara,977,2024-10-13
+Sorghum,Nyabugogo,596,2024-10-13
+Flour,Kicukiro,3478,2024-10-14
+Sorghum,Kigali City Market,659,2024-10-14
+Flour,Kigali City Market,3710,2024-10-14
+Spinach,Kicukiro,218,2024-10-14
+Sorghum,Kigali City Market,630,2024-10-14
+Maize Flour,Kimironko,3641,2024-10-15
+Maize Flour,Kicukiro,3882,2024-10-15
+Maize,Kimironko,446,2024-10-15
+Flour,Nyabugogo,3414,2024-10-15
+Spinach,Nyabugogo,202,2024-10-15
+Sorghum,Kigali City Market,677,2024-10-16
+Sorghum,Kimironko,627,2024-10-16
+Flour,Kimironko,3598,2024-10-16
+Sorghum,Kimisagara,598,2024-10-16
+Rice,Kicukiro,10702,2024-10-17
+Maize Flour,Kimironko,3716,2024-10-17
+Flour,Kimironko,3391,2024-10-17
+Maize Flour,Kigali City Market,3936,2024-10-17
+Sorghum,Nyabugogo,568,2024-10-17
+Bananas,Kimironko,462,2024-10-17
+Potatoes,Kimironko,662,2024-10-17
+Flour,Kigali City Market,3745,2024-10-17
+Flour,Nyabugogo,3339,2024-10-18
+Cabbage,Kicukiro,328,2024-10-18
+Sorghum,Kimisagara,579,2024-10-18
+Spinach,Kigali City Market,218,2024-10-19
+Spinach,Kimisagara,204,2024-10-19
+Flour,Kimisagara,3286,2024-10-19
+Spinach,Kicukiro,220,2024-10-20
+Potatoes,Kimironko,690,2024-10-21
+Bananas,Kicukiro,462,2024-10-22
+Potatoes,Kimisagara,606,2024-10-23
+Flour,Kimisagara,3294,2024-10-23
+Maize,Kimironko,466,2024-10-23
+Sorghum,Nyabugogo,581,2024-10-25
+Flour,Kimisagara,3221,2024-10-26
+Flour,Kimironko,3488,2024-10-26
+Bananas,Kigali City Market,471,2024-10-26
+Maize Flour,Kimisagara,3459,2024-10-26
+Potatoes,Nyabugogo,600,2024-10-26
+Spinach,Kicukiro,232,2024-10-26
+Bananas,Kicukiro,482,2024-10-27
+Maize,Kicukiro,496,2024-10-28
+Maize,Nyabugogo,427,2024-10-28
+Bananas,Nyabugogo,430,2024-10-28
+Sorghum,Kicukiro,669,2024-10-30
+Cabbage,Kimisagara,316,2024-10-30
+Sorghum,Kicukiro,673,2024-10-30
+Spinach,Kimironko,226,2024-10-31
+Sorghum,Kimisagara,557,2024-10-31
+Potatoes,Kimisagara,648,2024-10-31
+Maize,Kimironko,490,2024-11-01
+Beans (Dry),Kimironko,1106,2024-11-01
+Maize,Nyabugogo,466,2024-11-01
+Flour,Kimisagara,3250,2024-11-02
+Flour,Kigali City Market,3625,2024-11-03
+Potatoes,Kimisagara,637,2024-11-04
+Spinach,Nyabugogo,210,2024-11-04
+Maize,Kigali City Market,517,2024-11-05
+Rice,Kimironko,10454,2024-11-05
+Rice,Kimisagara,10115,2024-11-06
+Potatoes,Kigali City Market,696,2024-11-06
+Bananas,Kicukiro,497,2024-11-06
+Rice,Kigali City Market,11208,2024-11-06
+Maize,Kimisagara,427,2024-11-07
+Flour,Kimisagara,3360,2024-11-08
+Flour,Kimisagara,3172,2024-11-08
+Potatoes,Kicukiro,693,2024-11-09
+Flour,Nyabugogo,3239,2024-11-09
+Cabbage,Kimironko,340,2024-11-10
+Maize Flour,Kigali City Market,3872,2024-11-10
+Spinach,Nyabugogo,221,2024-11-10
+Beans (Dry),Kimisagara,959,2024-11-11
+Flour,Kicukiro,3601,2024-11-11
+Cabbage,Nyabugogo,324,2024-11-12
+Sorghum,Kimisagara,570,2024-11-12
+Flour,Nyabugogo,3341,2024-11-12
+Bananas,Kimironko,497,2024-11-13
+Beans (Dry),Kigali City Market,1175,2024-11-13
+Maize Flour,Kimisagara,3316,2024-11-14
+Sorghum,Kicukiro,638,2024-11-15
+Maize Flour,Kigali City Market,3751,2024-11-15
+Rice,Kigali City Market,10961,2024-11-16
+Maize,Kimisagara,438,2024-11-16
+Sorghum,Kigali City Market,681,2024-11-17
+Spinach,Kimisagara,227,2024-11-17
+Flour,Nyabugogo,3318,2024-11-17
+Rice,Kigali City Market,11310,2024-11-18
+Rice,Kigali City Market,11300,2024-11-18
+Bananas,Kigali City Market,500,2024-11-18
+Maize Flour,Nyabugogo,3616,2024-11-18
+Rice,Kimironko,10201,2024-11-19
+Sorghum,Kigali City Market,652,2024-11-20
+Cabbage,Kigali City Market,380,2024-11-20
+Flour,Kimisagara,3435,2024-11-20
+Potatoes,Kicukiro,744,2024-11-22
+Cabbage,Kicukiro,367,2024-11-22
+Spinach,Kicukiro,245,2024-11-22
+Maize Flour,Kicukiro,3927,2024-11-22
+Maize,Kimironko,510,2024-11-23
+Sorghum,Kicukiro,678,2024-11-23
+Spinach,Kimironko,248,2024-11-24
+Beans (Dry),Kigali City Market,1191,2024-11-24
+Maize,Kimironko,525,2024-11-25
+Spinach,Kimisagara,239,2024-11-26
+Beans (Dry),Kimironko,1172,2024-11-26
+Rice,Nyabugogo,9761,2024-11-26
+Sorghum,Kimisagara,638,2024-11-26
+Potatoes,Kimisagara,639,2024-11-26
+Maize Flour,Kicukiro,3837,2024-11-27
+Potatoes,Kicukiro,704,2024-11-27
+Flour,Nyabugogo,3557,2024-11-27
+Bananas,Kigali City Market,525,2024-11-28
+Sorghum,Kimironko,688,2024-11-28
+Potatoes,Kicukiro,715,2024-11-28
+Maize,Nyabugogo,470,2024-11-28
+Maize,Kigali City Market,551,2024-11-29
+Maize,Kimironko,529,2024-11-29
+Spinach,Nyabugogo,252,2024-11-29
+Potatoes,Kigali City Market,744,2024-11-29
+Maize,Kigali City Market,536,2024-11-30
+Beans (Dry),Kimisagara,1066,2024-11-30
+Maize Flour,Kimironko,3960,2024-12-01
+Maize Flour,Nyabugogo,3615,2024-12-01
+Potatoes,Kimironko,768,2024-12-01
+Potatoes,Kimisagara,684,2024-12-01
+Flour,Kigali City Market,3727,2024-12-01
+Spinach,Kicukiro,256,2024-12-01
+Rice,Kimisagara,10375,2024-12-02
+Potatoes,Kigali City Market,754,2024-12-02
+Bananas,Kimisagara,464,2024-12-02
+Beans (Dry),Kimisagara,1026,2024-12-02
+Beans (Dry),Nyabugogo,1094,2024-12-02
+Sorghum,Kimisagara,613,2024-12-03
+Maize Flour,Nyabugogo,3785,2024-12-03
+Flour,Kigali City Market,3779,2024-12-03
+Maize,Kimisagara,448,2024-12-03
+Maize Flour,Kicukiro,3950,2024-12-04
+Flour,Kimisagara,3501,2024-12-04
+Maize Flour,Kicukiro,4003,2024-12-04
+Flour,Kimisagara,3279,2024-12-05
+Flour,Kicukiro,3713,2024-12-06
+Sorghum,Kimironko,695,2024-12-07
+Cabbage,Kimironko,401,2024-12-08
+Maize Flour,Kicukiro,4023,2024-12-09
+Spinach,Kicukiro,287,2024-12-09
+Sorghum,Nyabugogo,634,2024-12-09
+Bananas,Kigali City Market,572,2024-12-09
+Cabbage,Kimisagara,349,2024-12-09
+Bananas,Kimironko,552,2024-12-10
+Rice,Kicukiro,10987,2024-12-10
+Flour,Kicukiro,3837,2024-12-10
+Sorghum,Nyabugogo,616,2024-12-10
+Potatoes,Kimironko,737,2024-12-10
+Cabbage,Kimisagara,352,2024-12-11
+Maize Flour,Kigali City Market,4114,2024-12-12
+Spinach,Nyabugogo,261,2024-12-12
+Potatoes,Kimisagara,730,2024-12-13
+Maize,Nyabugogo,476,2024-12-13
+Flour,Kimisagara,3305,2024-12-14
+Maize,Nyabugogo,498,2024-12-14
+Flour,Kicukiro,3818,2024-12-14
+Maize Flour,Kigali City Market,4101,2024-12-14
+Maize,Kimisagara,461,2024-12-14
+Potatoes,Nyabugogo,703,2024-12-15
+Potatoes,Kigali City Market,814,2024-12-15
+Rice,Kimisagara,10707,2024-12-15
+Spinach,Kimironko,291,2024-12-15
+Beans (Dry),Kimisagara,1110,2024-12-16
+Beans (Dry),Kicukiro,1266,2024-12-16
+Spinach,Kigali City Market,289,2024-12-18
+Potatoes,Kimironko,775,2024-12-18
+Flour,Kimironko,3761,2024-12-18
+Rice,Kigali City Market,11487,2024-12-18
+Potatoes,Kicukiro,769,2024-12-18
+Beans (Dry),Nyabugogo,1138,2024-12-19
+Maize Flour,Nyabugogo,3811,2024-12-19
+Rice,Nyabugogo,10177,2024-12-19
+Beans (Dry),Kimironko,1186,2024-12-19
+Spinach,Kigali City Market,291,2024-12-20
+Maize,Kicukiro,521,2024-12-21
+Maize,Kicukiro,528,2024-12-21
+Sorghum,Kimironko,661,2024-12-21
+Beans (Dry),Nyabugogo,1182,2024-12-22
+Maize Flour,Kimironko,4058,2024-12-22
+Rice,Kimironko,10766,2024-12-22
+Maize Flour,Kimisagara,3511,2024-12-23
+Potatoes,Kimisagara,703,2024-12-23
+Beans (Dry),Kimisagara,1144,2024-12-24
+Rice,Kimironko,10667,2024-12-24
+Cabbage,Kimironko,428,2024-12-24
+Bananas,Kimironko,607,2024-12-25
+Cabbage,Kicukiro,397,2024-12-25
+Cabbage,Kimironko,418,2024-12-25
+Sorghum,Kicukiro,705,2024-12-25
+Maize,Kimironko,553,2024-12-26
+Rice,Kimironko,11562,2024-12-26
+Bananas,Nyabugogo,577,2024-12-26
+Flour,Kimironko,3675,2024-12-26
+Maize,Kimironko,528,2024-12-26
+Maize Flour,Nyabugogo,3928,2024-12-26
+Bananas,Kimisagara,571,2024-12-27
+Maize,Nyabugogo,497,2024-12-28
+Cabbage,Kimironko,418,2024-12-29
+Bananas,Kigali City Market,599,2024-12-29
+Bananas,Kigali City Market,597,2024-12-29
+Maize Flour,Kimisagara,3668,2024-12-30
+Bananas,Kigali City Market,617,2024-12-30
+Maize Flour,Kigali City Market,4220,2024-12-30
+Rice,Kicukiro,11170,2024-12-30
+Sorghum,Kimironko,742,2024-12-31
+Cabbage,Kimironko,422,2024-12-31

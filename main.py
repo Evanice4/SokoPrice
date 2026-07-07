@@ -1,10 +1,7 @@
 """
 SokoPrice FastAPI Backend
 AI Grocery Price Forecasting for Kigali Informal Markets
-Best model: XGBoost (tuned) - MAPE 8.27%, R2 0.9845
-Author: Nice Eva Karabaranga | ALU Capstone 2026
-Run   : python -m uvicorn main:app --reload
-Docs  : http://127.0.0.1:8000/docs
+
 """
 
 import warnings
