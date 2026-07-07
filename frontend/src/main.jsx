@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState}from'react';
 import{createRoot}from'react-dom/client';
 import{Bell,CheckCircle,Eye,EyeOff,LineChart,LogIn,LogOut,MapPin,Pencil,Plus,Shield,ShoppingBasket,Store,Trash2,TrendingDown,TrendingUp,Upload,User,Users,Wallet}from'lucide-react';
+import sokopriceLogo from '../../images/sokopricelogo.png';
 import{Bar,BarChart,Cell,Line,LineChart as RLineChart,Pie,PieChart,ResponsiveContainer,Tooltip,XAxis,YAxis}from'recharts';
 import'./styles.css';
 
@@ -130,7 +131,7 @@ function Layout({page,setPage,children}){
     <>
       <div className="top">
           <div className="brand-logo" onClick={()=>setPage('Home')}>
-          <img src="/sokopricelogo.png" alt="SokoPrice" className="brand-img"/>
+          <img src={sokopriceLogo} alt="SokoPrice" className="brand-img"/>
           <span className="brand-text">SokoPrice</span>
         </div>
         {!isAdminPage&&<nav>{nav.map(n=><button key={n} className={page===n?'active':''} onClick={()=>setPage(n)} style={{fontSize:13.5}}>{navLabels[n]||n}</button>)}</nav>}
@@ -1086,14 +1087,36 @@ function Admin(){
 
   return(
     <main>
-      <section style={{padding:'32px 0 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <div>
-          <h1 style={{margin:0}}>Platform <span style={{color:'#087a3a'}}>Control Centre</span></h1>
-        </div>
-        <div className="admin-tabs" style={{display:'flex',gap:8,flexWrap:'nowrap',overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
-          {TABS.map(([t,l])=>(
-            <button key={t} onClick={()=>setTab(t)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid',borderColor:tab===t?'#087a3a':'#e5e9ef',background:tab===t?'#087a3a':'white',color:tab===t?'white':'#344054',fontWeight:600,cursor:'pointer',fontSize:13,whiteSpace:'nowrap'}}>{l}</button>
-          ))}
+      <section style={{padding:'32px 0 24px'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 2px'}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'flex-start'}}>
+            <h1 style={{margin:0,textAlign:'left'}}>Platform <span style={{color:'#087a3a'}}>Control Centre</span></h1>
+          </div>
+
+          <div style={{marginTop:14,display:'flex',alignItems:'center',justifyContent:'flex-start'}}>
+            <div className="admin-tabs" style={{display:'flex',gap:10,flexWrap:'wrap',overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+              {TABS.map(([t,l])=>(
+                <button
+                  key={t}
+                  onClick={()=>setTab(t)}
+                  style={{
+                    padding:'10px 18px',
+                    borderRadius:12,
+                    border:'1px solid',
+                    borderColor:tab===t?'#087a3a':'#e5e9ef',
+                    background:tab===t?'#087a3a':'white',
+                    color:tab===t?'white':'#344054',
+                    fontWeight:700,
+                    cursor:'pointer',
+                    fontSize:13,
+                    whiteSpace:'nowrap'
+                  }}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1122,12 +1145,41 @@ function Admin(){
               <h3 style={{marginTop:0}}>Top Commodities</h3>
               <ResponsiveContainer height={210}>
                 <PieChart>
-                  <Pie data={stats.top_commodities?.map(c=>({name:c.commodity,value:c.requests}))} dataKey="value" outerRadius={78} innerRadius={40}>
+                  <Pie
+                    data={stats.top_commodities?.map(c=>({name:c.commodity,value:c.requests}))}
+                    dataKey="value"
+                    outerRadius={78}
+                    innerRadius={40}
+                  >
                     {stats.top_commodities?.map((_,i)=><Cell key={i} fill={PALETTE[i%PALETTE.length]}/>)}
                   </Pie>
                   <Tooltip/>
                 </PieChart>
               </ResponsiveContainer>
+
+              {stats.top_commodities?.length>0&&(()=>{
+                const total = stats.top_commodities.reduce((s,c)=>s+(c.requests||0),0) || 0;
+                return(
+                  <div style={{marginTop:14}}>
+                    <div style={{fontWeight:700,fontSize:12,marginBottom:10,color:'#344054'}}>Legend</div>
+                    <div style={{display:'flex',flexWrap:'wrap',gap:'10px 14px'}}>
+                      {stats.top_commodities.map((c,i)=>{
+                        const value = c.requests||0;
+                        const pct = total ? (value/total)*100 : 0;
+                        return(
+                          <div key={c.commodity} style={{display:'flex',alignItems:'center',gap:8,minWidth:180}}>
+                            <span style={{width:10,height:10,borderRadius:3,background:PALETTE[i%PALETTE.length],flexShrink:0}}/>
+                            <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
+                              <span style={{fontSize:12,fontWeight:700,color:'#101820'}}>{c.commodity}</span>
+                              <span style={{fontSize:12,color:'#667085',fontWeight:600}}>{pct.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </Card>
           </div>
         </>
