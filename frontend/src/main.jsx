@@ -129,7 +129,7 @@ function Layout({page,setPage,children}){
   return(
     <>
       <div className="top">
-        <div className="brand-logo" onClick={()=>setPage('Home')}>
+          <div className="brand-logo" onClick={()=>setPage('Home')}>
           <img src="/sokopricelogo.png" alt="SokoPrice" className="brand-img"/>
           <span className="brand-text">SokoPrice</span>
         </div>
@@ -929,12 +929,13 @@ function Sellers(){
         </div>
 
         <div style={{display:'grid',gap:16,alignContent:'start'}}>
-          <div style={{position:'relative',borderRadius:16,overflow:'hidden',width:'100%',height:280,margin:'-8px 0'}}>
+          <div style={{position:'relative',borderRadius:16,overflow:'hidden',width:'100%',height:360,margin:'-12px 0 -2px'}}>
             <img src="/seller.png" alt="Happy market seller" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-            <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg, rgba(8,122,58,0) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 75%, rgba(0,0,0,0.85) 100%)'}}/>
+            {/* Keep hero coverage behind the next card, but make it transparent around where the next text starts */}
+            <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg, rgba(8,122,58,0) 0%, rgba(0,0,0,0) 42%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.28) 100%)'}}/>
             <div style={{position:'absolute',bottom:24,left:24,right:24}}>
-              <div style={{background:'rgba(0,0,0,.55)',backdropFilter:'blur(4px)',WebkitBackdropFilter:'blur(4px)',display:'inline-block',padding:'5px 14px',borderRadius:8}}>
-                <span style={{color:'rgba(255,255,255,.9)',fontSize:12}}>Manage your market presence</span>
+              <div style={{background:'rgba(0,0,0,.35)',backdropFilter:'blur(4px)',WebkitBackdropFilter:'blur(4px)',display:'inline-block',padding:'5px 14px',borderRadius:8}}>
+                <span style={{color:'rgba(255,255,255,.92)',fontSize:12}}>Manage your market presence</span>
               </div>
             </div>
           </div>
@@ -1088,7 +1089,7 @@ function Admin(){
         <div>
           <h1 style={{margin:0}}>Platform <span style={{color:'#087a3a'}}>Control Centre</span></h1>
         </div>
-        <div className="admin-tabs" style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <div className="admin-tabs" style={{display:'flex',gap:8,flexWrap:'nowrap',overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
           {TABS.map(([t,l])=>(
             <button key={t} onClick={()=>setTab(t)} style={{padding:'10px 18px',borderRadius:10,border:'1px solid',borderColor:tab===t?'#087a3a':'#e5e9ef',background:tab===t?'#087a3a':'white',color:tab===t?'white':'#344054',fontWeight:600,cursor:'pointer',fontSize:13,whiteSpace:'nowrap'}}>{l}</button>
           ))}

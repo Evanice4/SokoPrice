@@ -195,7 +195,9 @@ footer{
 .badges small{color:var(--muted);font-size:.7rem}
 .tag,.pill{background:#e7f7eb;color:var(--green);border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;display:inline-block}
 .select svg{flex-shrink:0}
-.admin-tabs{display:flex;flex-wrap:wrap;gap:.5rem} /* 8px spacing */
+.admin-tabs{display:flex;flex-wrap:nowrap;gap:.5rem;overflow-x:auto;align-items:center} /* keep tabs on one line */
+.admin-tabs::-webkit-scrollbar{height:6px}
+.admin-tabs::-webkit-scrollbar-thumb{background:rgba(8,122,58,.25);border-radius:10px}
 .admin-tabs button{font-size:.7rem;padding:.5rem .625rem;min-height:40px;border-radius:8px;white-space:nowrap}
 .auth-card{width:100%;max-width:100%;padding:1.5rem 1rem;border-radius:var(--radius-lg);background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.08)}
 
