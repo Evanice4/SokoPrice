@@ -502,13 +502,27 @@ def send_message(req: SendMessageRequest,
         raise HTTPException(403, "Admins cannot send messages")
     if req.receiver_id == current_user["user_id"]:
         raise HTTPException(400, "Cannot message yourself")
+
     conn = get_db()
+
     receiver = conn.execute(
-        "SELECT id FROM users WHERE id=?", (req.receiver_id,)
+        "SELECT id, role FROM users WHERE id=?",
+        (req.receiver_id,)
     ).fetchone()
     if not receiver:
         conn.close()
         raise HTTPException(404, "Receiver not found")
+
+    # Ensure sender/receiver roles match expected chat pairing:
+    # - consumer -> seller
+    # - seller   -> consumer
+    if current_user["role"] == "consumer" and receiver["role"] != "seller":
+        conn.close()
+        raise HTTPException(400, "Consumers can only message sellers")
+    if current_user["role"] == "seller" and receiver["role"] != "consumer":
+        conn.close()
+        raise HTTPException(400, "Sellers can only message consumers")
+
     now = datetime.utcnow().isoformat()
     cursor = conn.execute(
         """INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
@@ -528,33 +542,65 @@ def send_message(req: SendMessageRequest,
 
 @app.get("/messages/conversations", tags=["Messages"])
 def list_conversations(current_user: dict = Depends(get_current_user)):
-    """List users you've exchanged messages with, with last message + unread count."""
+    """List users you've exchanged messages with, with last message + unread count.
+
+    Conversation identity is standardized as an unordered pair of user IDs (uid <-> partner_id),
+    derived from both sender_id and receiver_id stored in messages.
+    """
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     uid = current_user["user_id"]
-    # Get distinct conversation partners with last message and unread count
+
+    # Build conversations as: partner_id = other user in (sender_id, receiver_id) pair.
     rows = conn.execute(
-        """SELECT
-             CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END as partner_id,
-             u.name as partner_name,
-             u.role as partner_role,
-             (SELECT message FROM messages m2
-              WHERE (m2.sender_id = ? AND m2.receiver_id = partner_id)
-                 OR (m2.sender_id = partner_id AND m2.receiver_id = ?)
-              ORDER BY m2.created_at DESC LIMIT 1) as last_message,
-             (SELECT created_at FROM messages m3
-              WHERE (m3.sender_id = ? AND m3.receiver_id = partner_id)
-                 OR (m3.sender_id = partner_id AND m3.receiver_id = ?)
-              ORDER BY m3.created_at DESC LIMIT 1) as last_time,
-             (SELECT COUNT(*) FROM messages m4
-              WHERE m4.sender_id = partner_id AND m4.receiver_id = ? AND m4.read = 0) as unread
-           FROM messages m
-           JOIN users u ON u.id = CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END
-           WHERE m.sender_id = ? OR m.receiver_id = ?
-           GROUP BY partner_id
-           ORDER BY last_time DESC""",
-        (uid, uid, uid, uid, uid, uid, uid, uid)
+        """
+        SELECT
+          partner_id,
+          u.name as partner_name,
+          u.role as partner_role,
+          (
+            SELECT m2.message
+            FROM messages m2
+            WHERE
+              (m2.sender_id = uid AND m2.receiver_id = partner_id)
+              OR
+              (m2.sender_id = partner_id AND m2.receiver_id = uid)
+            ORDER BY m2.created_at DESC
+            LIMIT 1
+          ) as last_message,
+          (
+            SELECT m3.created_at
+            FROM messages m3
+            WHERE
+              (m3.sender_id = uid AND m3.receiver_id = partner_id)
+              OR
+              (m3.sender_id = partner_id AND m3.receiver_id = uid)
+            ORDER BY m3.created_at DESC
+            LIMIT 1
+          ) as last_time,
+          (
+            SELECT COUNT(*)
+            FROM messages m4
+            WHERE
+              m4.sender_id = partner_id
+              AND m4.receiver_id = uid
+              AND m4.read = 0
+          ) as unread
+        FROM (
+          SELECT
+            CASE
+              WHEN sender_id = ? THEN receiver_id
+              ELSE sender_id
+            END as partner_id
+          FROM messages
+          WHERE sender_id = ? OR receiver_id = ?
+          GROUP BY partner_id
+        ) p
+        JOIN users u ON u.id = p.partner_id
+        ORDER BY last_time DESC
+        """,
+        (uid, uid, uid)
     ).fetchall()
     conn.close()
     return {"conversations": [dict(r) for r in rows]}
@@ -568,12 +614,14 @@ def get_conversation(partner_id: int,
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     uid = current_user["user_id"]
-    # Mark unread messages from this partner as read
+
+    # Mark unread messages from this partner as read (directional: partner -> me)
     conn.execute(
         "UPDATE messages SET read=1 WHERE sender_id=? AND receiver_id=? AND read=0",
         (partner_id, uid)
     )
     conn.commit()
+
     rows = conn.execute(
         """SELECT m.*, u.name as sender_name
            FROM messages m JOIN users u ON m.sender_id = u.id
