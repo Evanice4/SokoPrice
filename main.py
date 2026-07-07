@@ -606,6 +606,30 @@ def list_conversations(current_user: dict = Depends(get_current_user)):
     return {"conversations": [dict(r) for r in rows]}
 
 
+# IMPORTANT: Declare static routes BEFORE dynamic routes like /messages/{partner_id}
+# to prevent FastAPI from interpreting "unread-count" as partner_id.
+@app.get("/messages/unread-count", tags=["Messages"])
+def unread_count(
+    partner_id: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get total unread message count for badge display.
+
+    `partner_id` is accepted for backward/forward compatibility with any
+    frontend variants that may pass it as a query parameter.
+    """
+    if current_user["role"] == "admin":
+        raise HTTPException(403, "Admins cannot access messages")
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0",
+        (current_user["user_id"],)
+    ).fetchone()
+    conn.close()
+    return {"count": row["c"]}
+
+
 @app.get("/messages/{partner_id}", tags=["Messages"])
 def get_conversation(partner_id: int,
                      current_user: dict = Depends(get_current_user)):
@@ -648,29 +672,6 @@ def mark_read(message_id: int,
     conn.commit()
     conn.close()
     return {"status": "ok"}
-
-
-@app.get("/messages/unread-count", tags=["Messages"])
-def unread_count(
-    partner_id: Optional[int] = None,
-    current_user: dict = Depends(get_current_user)
-):
-    """Get total unread message count for badge display.
-
-    `partner_id` is accepted for backward/forward compatibility with any
-    frontend variants that may pass it as a query parameter.
-    """
-    if current_user["role"] == "admin":
-        raise HTTPException(403, "Admins cannot access messages")
-
-    conn = get_db()
-    # Total unread messages for the logged-in user
-    row = conn.execute(
-        "SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0",
-        (current_user["user_id"],)
-    ).fetchone()
-    conn.close()
-    return {"count": row["c"]}
 
 
 # ── Seller endpoints ──────────────────────────────────────────────────────────
