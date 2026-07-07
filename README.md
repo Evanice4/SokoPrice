@@ -1,318 +1,428 @@
 # SokoPrice
 
-AI-powered grocery price forecasting and market recommendation for informal markets in Kigali, Rwanda.
-
-**Author:** Nice Eva Karabaranga | ALU Capstone 2026
-
-**Model:** XGBoost (tuned) -- MAPE 8.27%, R2 0.9845
+**SokoPrice** is an AI-powered grocery price forecasting and shopping assistant for Kigali's informal markets. It helps consumers compare food prices across markets, estimate basket costs, identify affordable markets, and communicate with sellers. The system supports seller listings, real price submissions, admin review, and AI-based price forecasting using a trained XGBoost machine learning model.
 
 ---
 
-## Description
+## Live Deployment
 
-SokoPrice forecasts short-term grocery prices for informal markets in Kigali and helps consumers find the cheapest market for their shopping basket. It covers five Kigali markets: Kimironko, Nyabugogo, Kicukiro, Kimisagara, and Kigali City Market, and ten staple commodities: Maize, Maize Flour, Potatoes, Rice, Beans (Dry), Sorghum, Bananas, Spinach, Cabbage, and Flour.
+| Service | Link |
+|---|---|
+| Frontend Web App | https://soko-price-forecasting.web.app |
+| Backend API | https://sokoprice.onrender.com |
+| API Documentation | https://sokoprice.onrender.com/docs |
+| Demo | https://drive.google.com/drive/folders/1zx5COrJJdiu6-C2jY8XAhW6i_9dej-gp?usp=sharing |
 
-The prototype is trained on the WFP VAM Kenya food price dataset as proxy data. Kenya and Rwanda share comparable informal market structures and staple food baskets. All 226 Kenyan market names are remapped cyclically to the five Kigali market names so the model trains on Kigali labels directly. Prices are converted from KES to RWF at a rate of 1 KES = 10 RWF. The admin dashboard allows uploading real Kigali price CSVs at any time, after which the model immediately uses the real price history as lag features instead of the proxy fallback.
+---
 
-## App Features
+## Default Admin Account
 
-### Pricing
+| Field | Value |
+|---|---|
+| Email | `admin@sokoprice.rw` |
+| Password | `admin123` |
 
-Select a commodity and market to get a 7-day AI price forecast with confidence interval and trend direction. The recommendation endpoint ranks all five markets by predicted price and shows how much you save at the cheapest market.
+Admin dashboard is accessible at `https://soko-price-forecasting.web.app/#admin` while logged in as admin. It is not linked in the navigation and is not visible to regular users.
 
-### Markets
+---
 
-Interactive Leaflet map showing all five Kigali markets with GPS pins. Clicking a market pin loads that market's current seller listings. Distance from the user's location is shown on each market card when location access is granted.
+## Project Description
 
-### Cost Estimator
+SokoPrice forecasts short-term grocery prices for informal markets in Kigali and helps consumers find the cheapest market for their shopping basket. It covers five Kigali markets and ten staple commodities.
 
-Build a shopping basket, set an optional budget threshold, and get AI-predicted total costs. A compare button runs the basket across all five markets simultaneously and shows which market keeps you within budget. A map highlights the cheapest market in orange.
+The model is trained on the WFP VAM Kenya food price dataset as proxy data. Kenya and Rwanda share comparable informal market structures and staple food baskets. All 226 Kenyan market names are remapped cyclically to five Kigali market labels so the model trains on Kigali names directly. Prices are converted from KES to RWF at a rate of 1 KES = 10 RWF.
 
-### Alerts
+The admin dashboard allows uploading real Kigali price CSVs at any time. Once uploaded, the model immediately uses the real price history as lag features instead of the median proxy fallback, improving prediction accuracy progressively as more real data accumulates.
 
-Set a budget threshold per commodity and market. The AI model predicts today's price and flags whether it exceeds your threshold. A live price watch table shows the current status of five key commodities automatically.
+### Markets and Commodities
 
-### Sellers
+| Category | Values |
+|---|---|
+| Markets | Kimironko, Nyabugogo, Kicukiro, Kimisagara, Kigali City Market |
+| Commodities | Maize, Maize Flour, Potatoes, Rice, Beans (Dry), Sorghum, Bananas, Spinach, Cabbage, Flour |
+| Price Unit | RWF (Rwandan Francs) |
 
-Sellers log in to add, edit, and delete product listings. Each listing shows the seller's price alongside the AI forecast price with a status of above, at, or below market. A real-time price submission form lets sellers submit actual prices directly to the model to improve predictions. A bar chart compares AI forecasts vs the seller's prices across all markets.
+### User Types
 
-### Admin
+| User | Main Functions |
+|---|---|
+| Consumer | Forecast prices, compare markets, estimate basket costs, set alerts, chat with sellers |
+| Seller | List products, submit real market prices, compare prices with AI estimates, chat with consumers |
+| Admin | Manage users, review submissions, upload price data, retrain the model, monitor platform stats |
 
-Accessible only via `/#admin` hash while logged in as admin. Shows platform statistics, recent forecast requests, user management with suspend or reactivate, all seller products, CSV price data upload, and a market prices tab that shows AI predictions for all commodities at a selected market.
+---
 
-## Prerequisites
+## Key Features
 
-- Python 3.10+
-- Node.js 18+
-- npm
+**AI Price Forecasting** - Select a commodity, market, and forecast date to receive an estimated price in RWF. The system uses a trained XGBoost model with 18 engineered features including lag prices, rolling statistics, cyclical month encoding, and label encodings for commodity and market.
 
-## Installation
+**Market Comparison** - Ranks all five markets by predicted price for a selected commodity. Shows how much you save at the cheapest market. Distance from the user's GPS location is shown on each market card when location access is granted.
 
-### Backend
+**Cost Estimator** - Build a basket of multiple commodities and quantities. The app estimates the total cost at a selected market, compares the basket across all five markets simultaneously, and shows which market keeps you within your budget threshold. A map highlights the cheapest market in orange.
 
-```bash
-pip install -r requirements.txt
+**Price Alerts** - Set a budget threshold per commodity and market. The model predicts the current price and flags whether it exceeds the threshold. A live price watch table shows the status of five key commodities automatically on page load.
+
+**Seller Dashboard** - Sellers add, edit, and delete product listings. Each listing shows the seller's price alongside the AI forecast price with a status of above, at, or below market. A price submission form lets sellers submit actual prices to improve model predictions. A bar chart compares AI forecasts vs seller prices across all markets.
+
+**Admin Dashboard** - Shows platform statistics, recent forecast requests, user management with suspend or reactivate, all seller products, CSV price data upload with immediate model effect, and a market prices tab showing AI predictions for all commodities at a selected market.
+
+**In-App Messaging** - Consumers and sellers can send messages to each other. Conversations are linked to authenticated users and stored in the database.
+
+**Interactive Map** - Leaflet and OpenStreetMap map showing all five Kigali markets with clickable pins. Clicking a pin loads that market's current seller listings. The user's GPS location is shown as a separate pin when location access is granted.
+
+---
+
+## System Architecture
+
+```
+User Browser
+    |
+Firebase Hosting
+React / Vite Frontend
+    | API calls
+Render Backend
+FastAPI + JWT Auth + SQLite + XGBoost Model
+    |
+Best_model/model_xgb_tuned.pkl
+encoders/le_commodity.pkl
+encoders/le_market.pkl
 ```
 
-Dependencies: FastAPI, Uvicorn, scikit-learn, XGBoost, NumPy, Joblib, PyJWT, python-multipart, Pydantic.
+---
 
-### Frontend
+## Technology Stack
 
-```bash
-cd frontend
-npm install
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI, Python, Uvicorn |
+| ML Model | XGBoost, scikit-learn, joblib |
+| Database | SQLite WAL mode |
+| Auth | JWT tokens, SHA-256 password hashing |
+| Frontend | React 18, Vite |
+| Charts | Recharts |
+| Maps | Leaflet, OpenStreetMap |
+| Deployment | Render (backend), Firebase Hosting (frontend) |
+
+---
+
+## Machine Learning Pipeline
+
+The model was trained following the CRISP-DM methodology across ten phases documented in the notebook at `notebook/SokoPrice_V2_Notebook.ipynb`.
+
+### Dataset
+
+```
+Data/wfp_food_prices_ken.csv
 ```
 
-Dependencies: React, Vite, Recharts, Lucide React, Leaflet.
+WFP VAM Kenya food price dataset used as proxy data for Kigali. After applying a retail-only filter, 9,584 rows remain covering 2006 to 2026 across 226 Kenyan markets remapped to five Kigali market names.
 
-### Database
+### Feature Engineering
 
-The database is created automatically on first run. An admin user is seeded with the credentials below.
+18 features were engineered per record:
 
-## Running the App
+| Feature Group | Features |
+|---|---|
+| Temporal | year, month_sin, month_cos, quarter, day_of_year |
+| Lag prices | price_lag_1, price_lag_2, price_lag_3, price_lag_6 |
+| Rolling statistics | rolling_mean_3, rolling_mean_6, rolling_mean_12, rolling_std_3, rolling_std_6 |
+| Momentum | price_pct_change_1m, price_pct_change_3m |
+| Encodings | commodity_enc, market_enc |
 
-### Start the Backend
+Cyclical encoding (sin/cos) is used for month to avoid the discontinuity between December and January. Label encoders are saved separately and loaded at inference time.
 
-```bash
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+### Validation Strategy
+
+Rolling window validation replaces a single train/test split. The model trains on three years of data and predicts the fourth year. The window shifts forward one year per fold producing 18 independent evaluation folds. This directly replicates how the model is used in production and provides a more reliable accuracy estimate than a single split.
+
+### Hyperparameter Tuning
+
+XGBoost and LightGBM were tuned using `RandomizedSearchCV` with `cv=3` cross-validation within each training fold, covering `n_estimators`, `learning_rate`, `max_depth`, `subsample`, and `colsample_bytree`.
+
+Best XGBoost parameters: `n_estimators=500, learning_rate=0.1, max_depth=6, subsample=0.8, colsample_bytree=1.0`
+
+### Model Comparison Results
+
+Results averaged across all 18 rolling window folds. Primary metric is MAPE. All prices in RWF.
+
+| Model | MAE (RWF) | RMSE (RWF) | R2 | MAPE (%) | Directional Accuracy (%) |
+|---|---|---|---|---|---|
+| XGBoost (tuned) | 45.90 | 69.84 | 0.886 | 8.75 | 92.81 |
+| Linear Regression | 48.17 | 70.53 | 0.921 | 8.78 | 93.26 |
+| LightGBM (tuned) | 48.66 | 72.67 | 0.863 | 9.13 | 92.00 |
+| Ridge Regression | 55.94 | 77.59 | 0.894 | 10.43 | 92.84 |
+| Random Forest | 62.98 | 89.98 | 0.839 | 11.69 | 91.17 |
+
+**Best model: XGBoost (tuned)** — MAPE 8.75%, MAE 45.90 RWF, Directional Accuracy 92.81%.
+
+XGBoost narrowly outperforms Linear Regression on MAPE (8.75% vs 8.78%) and is the model wired into `main.py`. Linear Regression has a slightly higher R2 (0.921 vs 0.886), suggesting the lag and rolling features capture most of the temporal signal linearly. All five models achieve directional accuracy above 91%, correctly predicting whether prices go up or down more than 9 times out of 10.
+
+### Model Files
+
+```
+Best_model/model_xgb_tuned.pkl
+encoders/le_commodity.pkl
+encoders/le_market.pkl
 ```
 
-| URL | Description |
-|-----|-------------|
-| http://127.0.0.1:8000 | API health check |
-| http://127.0.0.1:8000/docs | Interactive Swagger documentation |
+### Model Retraining
 
-### Start the Frontend
+After uploading real price data through the admin panel the model can be retrained:
+
+1. Go to Admin then Data Upload
+2. Upload a CSV file with columns: `commodity, market, price_rwf, price_date`
+3. Click Retrain Model on Uploaded Data
+4. The retrained model replaces the previous one immediately
+5. All subsequent predictions use the updated model
+
+Via API:
 
 ```bash
-cd frontend
-npm run dev
+curl -X POST https://sokoprice.onrender.com/admin/retrain \
+  -H "Authorization: Bearer <admin_token>"
 ```
 
-| URL | Description |
-|-----|-------------|
-| http://127.0.0.1:5173 | Main application |
-| http://127.0.0.1:5173/#admin | Admin dashboard (requires admin login) |
-
-### Default Admin Account
-
-| Field    | Value                  |
-|----------|------------------------|
-| Email    | admin@sokoprice.rw     |
-| Password | admin123               |
-
-## Environment Variables
-
-| Variable       | Default                 | Description            |
-|----------------|-------------------------|------------------------|
-| `DB_PATH`      | `sokoprice.db`          | SQLite database path   |
-| `VITE_API_URL` | `http://localhost:8000` | Backend API URL        |
+---
 
 ## API Endpoints
 
 ### Authentication
 
-| Method | Path             | Description              |
-|--------|------------------|--------------------------|
-| POST   | `/auth/register` | Register a new user      |
-| POST   | `/auth/login`    | Login and receive JWT    |
-| GET    | `/auth/me`       | Get current user profile |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| POST | `/auth/register` | Register a new user | None |
+| POST | `/auth/login` | Login and receive JWT token | None |
+| GET | `/auth/me` | Get current user profile | User |
 
-### Forecasting
+### Forecasting and Catalog
 
-| Method | Path        | Description                                    |
-|--------|-------------|------------------------------------------------|
-| POST   | `/predict`  | Predict price for a commodity, market, and date |
-| POST   | `/recommend`| Recommend the cheapest market for a commodity   |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/` | Health check and model status | None |
+| GET | `/commodities` | List supported commodities | None |
+| GET | `/markets` | List supported markets | None |
+| POST | `/predict` | 7-day price forecast | None |
+| POST | `/recommend` | Cheapest market ranking | None |
 
 ### Shopping
 
-| Method | Path                  | Description                                 |
-|--------|-----------------------|---------------------------------------------|
-| POST   | `/basket`             | Estimate total cost for a basket of items   |
-| GET    | `/alerts/{commodity}` | Check if predicted price exceeds a threshold |
-
-### Catalog
-
-| Method | Path           | Description                    |
-|--------|----------------|--------------------------------|
-| GET    | `/commodities` | List available commodities     |
-| GET    | `/markets`     | List available markets         |
-| GET    | `/products`    | List active seller listings    |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| POST | `/basket` | Estimate basket cost | None |
+| GET | `/alerts/{commodity}` | Price threshold check | None |
+| GET | `/products` | Public seller listings | None |
 
 ### Seller
 
-| Method | Path                          | Description                              |
-|--------|-------------------------------|------------------------------------------|
-| GET    | `/seller/products`            | List seller's own products               |
-| POST   | `/seller/products`            | Add a new product listing                |
-| PUT    | `/seller/products/{id}`       | Update a product listing                 |
-| DELETE | `/seller/products/{id}`       | Delete a product listing                 |
-| POST   | `/seller/submit-price`        | Submit a real market price for approval  |
-| GET    | `/seller/submissions`         | View own price submissions and status    |
-| GET    | `/seller/insights/{commodity}`| AI price comparison across markets       |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/seller/products` | Get own listings | Seller |
+| POST | `/seller/products` | Add a listing | Seller |
+| PUT | `/seller/products/{id}` | Update a listing | Seller |
+| DELETE | `/seller/products/{id}` | Delete a listing | Seller |
+| POST | `/seller/submit-price` | Submit a real market price | Seller |
+| GET | `/seller/submissions` | View own submissions | Seller |
+| GET | `/seller/insights/{commodity}` | AI price comparison | Seller |
 
 ### Messages
 
-| Method | Path                       | Description                          |
-|--------|----------------------------|--------------------------------------|
-| POST   | `/messages/send`           | Send a message to another user       |
-| GET    | `/messages/conversations`  | List conversation partners           |
-| GET    | `/messages/{partner_id}`   | Get conversation with a user         |
-| POST   | `/messages/{id}/read`      | Mark a message as read               |
-| GET    | `/messages/unread-count`   | Get total unread message count       |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| POST | `/messages/send` | Send a message | User |
+| GET | `/messages/conversations` | List conversations | User |
+| GET | `/messages/{partner_id}` | Get conversation | User |
+| POST | `/messages/{id}/read` | Mark as read | User |
+| GET | `/messages/unread-count` | Unread message count | User |
 
 ### Admin
 
-| Method | Path                              | Description                                |
-|--------|-----------------------------------|--------------------------------------------|
-| GET    | `/admin/stats`                    | Platform statistics                        |
-| GET    | `/admin/users`                    | List all users                             |
-| PUT    | `/admin/users/{id}/suspend`       | Suspend or reactivate a user               |
-| GET    | `/admin/products`                 | List all seller products                   |
-| POST   | `/admin/upload-prices`            | Upload CSV of real market prices           |
-| POST   | `/admin/retrain`                  | Retrain the XGBoost model on uploaded data |
-| GET    | `/admin/price-records`            | View all uploaded price records            |
-| POST   | `/admin/approve-submission/{id}`  | Approve a seller price submission          |
-| POST   | `/admin/reject-submission/{id}`   | Reject a seller price submission           |
-| GET    | `/admin/pending-submissions`      | List submissions awaiting review           |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/admin/stats` | Platform statistics | Admin |
+| GET | `/admin/users` | List all users | Admin |
+| PUT | `/admin/users/{id}/suspend` | Suspend or reactivate | Admin |
+| GET | `/admin/products` | All seller products | Admin |
+| POST | `/admin/upload-prices` | Upload price CSV | Admin |
+| POST | `/admin/retrain` | Retrain the model | Admin |
+| GET | `/admin/price-records` | View uploaded prices | Admin |
+| POST | `/admin/approve-submission/{id}` | Approve seller submission | Admin |
+| POST | `/admin/reject-submission/{id}` | Reject seller submission | Admin |
+| GET | `/admin/pending-submissions` | Pending submissions | Admin |
 
-## Model Retraining
+---
 
-After uploading real price data via the admin panel (CSV format), the model can be retrained.
+## Installation and Local Setup
 
-1. Go to Admin > Data Upload
-2. Upload a CSV file with columns: `commodity,market,price_rwf,price_date`
-3. Click "Retrain Model on Uploaded Data"
-4. New MAPE, R2, and RMSE metrics are displayed
-
-Alternatively, call the endpoint directly:
+### 1. Clone the repository
 
 ```bash
-curl -X POST http://127.0.0.1:8000/admin/retrain \
-  -H "Authorization: Bearer <admin_token>"
+git clone https://github.com/Evanice4/SokoPrice.git
+cd SokoPrice
 ```
 
-The retrained model replaces the previous one immediately. All subsequent predictions use the updated model.
+### 2. Install backend dependencies
 
-## Technology Stack
+```bash
+pip install -r requirements.txt
+```
 
-| Layer      | Technology                        |
-|------------|-----------------------------------|
-| Backend    | FastAPI (Python), Uvicorn         |
-| ML Model   | XGBoost, scikit-learn             |
-| Database   | SQLite (WAL mode)                 |
-| Auth       | JWT (python-jose), bcrypt hashing |
-| Frontend   | React 18, Vite                    |
-| Charts     | Recharts                          |
-| Maps       | Leaflet, OpenStreetMap            |
-| Styling    | Inline styles, custom CSS         |
+### 3. Start the backend
 
-## Markets and Commodities
+```bash
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
 
-**Markets:** Kimironko, Nyabugogo, Kicukiro, Kimisagara, Kigali City
+API at `http://127.0.0.1:8000` | Swagger UI at `http://127.0.0.1:8000/docs`
 
-**Commodities:** Maize, Maize Flour, Potatoes, Rice, Beans (Dry), Sorghum, Bananas, Spinach, Cabbage, Flour
+### 4. Install and start the frontend
 
-**Price unit:** RWF (Rwandan Francs)
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Known Issues and Fixes
+App at `http://localhost:5173`
+
+### 5. Create frontend environment file
+
+```
+frontend/.env
+```
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+For deployed backend:
+
+```env
+VITE_API_URL=https://sokoprice.onrender.com
+```
+
+### Admin access (local)
+
+Go to `http://localhost:5173/#admin` while logged in as admin.
+
+---
+
+## Testing
+
+### Backend testing
+
+Tested at `https://sokoprice.onrender.com/docs`. Confirmed API running, model loaded, XGBoost active, and all endpoints responding with RWF predictions.
+
+### Frontend testing
+
+Tested at `https://soko-price-forecasting.web.app`. Confirmed home page, price forecasting, market comparison, cost estimator, seller listings, admin dashboard, and mobile responsiveness all working correctly.
+
+### Mobile testing
+
+#### Android
+
+Market maps, seller listings, market cards, and navigation render correctly on a mobile browser.
+
+![Android market and seller testing](assets/test%20android.jpeg)
+
+![Android testing 2](assets/test%20android%202.jpeg)
+
+#### iOS - Cost Estimator
+
+Basket total, cost breakdown chart, commodity colour legend, and recalculate button display correctly on a mobile browser.
+
+![iOS cost estimator testing](assets/test%20ios.jpeg)
+
+#### iOS - Price Forecast
+
+Forecast results, confidence range, best market recommendation, and market comparison table display correctly on a mobile browser.
+
+![iOS price forecast testing](assets/test%20ios%202.jpeg)
+
+### Test summary
+
+| Test Area | Result |
+|---|---|
+| Backend deployment on Render | Passed |
+| Model loading and predictions | Passed |
+| Firebase frontend deployment | Passed |
+| Price forecasting | Passed |
+| Market comparison | Passed |
+| Cost estimator with budget | Passed |
+| Seller listings and CRUD | Passed |
+| Admin dashboard | Passed |
+| Android mobile display | Passed |
+| iOS mobile display | Passed |
+
+---
+
+## Errors Encountered and Fixes
 
 | Issue | Cause | Fix |
-|-------|-------|-----|
-| LSTM and GRU MAPE above 2700% | Scaler mismatch on inverse transform for sequence predictions | Documented as known issue, excluded from production |
-| Model predicting negative or very large values | XGBoost trained on unscaled y_train but prediction was applying scaler_y inverse transform | Removed scaler_y from inference; model predicts raw RWF directly |
-| Model predicting 0 for all commodities | `dill` module missing, model failed to load silently | `pip install dill` |
-| Model predicting same price for all markets | Lag features built from median fallback, not real price history | Upload real price CSV via admin dashboard |
+|---|---|---|
+| pip dependency conflict warnings | Kaggle pre-installed packages have version mismatches | Ignored, warnings only, no impact on output |
+| AttributeError numpy has no attribute _no_nep50_warning | scipy incompatible with numpy 2.x | Upgraded scipy with --no-deps flag |
+| Model predicting 0 for all commodities | dill module missing, model failed to load silently | pip install dill, added to requirements.txt |
+| Model predicting same price for all markets | Lag features built from median fallback not real price history | Upload real price CSV via admin dashboard |
+| Model predicting negative or very large values | XGBoost trained on unscaled y_train but prediction applied scaler_y inverse transform | Removed scaler_y from inference pipeline |
+| Database resetting on every restart | SQLite path resolved relative to working directory | Set absolute path using os.path.abspath in database.py |
+| Users losing login after browser refresh | JWT payload lacks name field, re-parsing token lost user object | Store full user object in localStorage as sp_user |
+| LSTM and GRU MAPE above 2700% | Scaler mismatch on inverse transform for sequence predictions | Excluded from production, documented as known issue |
+| Free Render instance delay | Free Render services sleep after 15 minutes of inactivity | First request after inactivity takes 30 to 60 seconds then resumes normally |
 
-## Deploying to Vercel
+---
 
-### Frontend
+## Future Work
 
-The frontend is a standard Vite + React application. A `vercel.json` is already included in the `frontend/` directory.
+Transport costs are not factored into the market recommendation. A future version should incorporate estimated moto-taxi fares based on GPS distance so the recommendation reflects total trip cost not just food price.
 
-1. Install the Vercel CLI:
-   ```bash
-   npm i -g vercel
-   ```
+The KES to RWF conversion uses a fixed multiplier of 10. Production should use a live exchange rate API.
 
-2. From the `frontend/` directory, deploy:
-   ```bash
-   cd frontend
-   vercel
-   ```
+Seasonal patterns learned from Kenya data may not transfer directly to Kigali. Seasonal features should be re-validated once real Kigali data is available.
 
-3. Follow the prompts. Vercel auto-detects the Vite framework.
+Real Kigali price data should be collected from the five markets at regular intervals recording commodity, market, price, and date consistently.
 
-4. Set the environment variable in the Vercel dashboard or via CLI:
-   ```bash
-   vercel env add VITE_API_URL
-   ```
-   Set it to your deployed backend URL (e.g., `https://sokoprice-api.vercel.app`).
+Other planned improvements include moving database persistence to PostgreSQL or Firestore, improving real-time chat using WebSockets or Firebase Realtime Database, adding automated CI/CD from GitHub, and adding model version tracking alongside retraining workflows.
 
-Alternatively, deploy directly from the Vercel dashboard:
-
-1. Go to [vercel.com](https://vercel.com) and import the repository
-2. Set the root directory to `frontend`
-3. Vercel auto-detects Vite and applies the build settings
-4. Add the `VITE_API_URL` environment variable pointing to your backend
-
-### Backend
-
-The backend FastAPI app includes a `vercel.json` at the project root and an `api/index.py` entry point for Vercel serverless Python.
-
-1. From the project root, deploy:
-   ```bash
-   vercel
-   ```
-
-2. Vercel detects the `@vercel/python` builder and deploys the API.
-
-Important notes for backend deployment:
-
-- The SQLite database file is not suitable for Vercel serverless (ephemeral filesystem). For production, migrate to a cloud database such as Turso, Neon, or Supabase.
-- The trained model file (`Best_model/model_xgb_tuned.pkl`, 2.8 MB) and encoders are loaded at cold start. They are within Vercel's 250 MB deployment limit.
-- Set `DB_PATH` to a persistent storage path or switch to a cloud database URL.
-- Admin seeding runs on first request if no admin user exists.
-
-### Connecting Frontend to Backend
-
-After deploying both, set the frontend's `VITE_API_URL` to the backend's Vercel URL:
-
-```bash
-# Example
-VITE_API_URL=https://sokoprice-api.vercel.app
-```
-
-Rebuild and redeploy the frontend after changing this variable.
-
-## Links
-
-- [Main project drive](https://drive.google.com/drive/folders/1zx5COrJJdiu6-C2jY8XAhW6i_9dej-gp?usp=sharing)
-- [Additional drive](https://drive.google.com/drive/folders/1s72nWteOMvkTcjruaI62MG0iwHTsSj87?usp=sharing)
+---
 
 ## Project Structure
 
 ```
-SokoPrice-main-2/
-  main.py                  FastAPI backend (all routes and ML logic)
-  database.py              SQLite schema, initialization, admin seed
-  auth.py                  Password hashing, JWT creation and verification
-  requirements.txt         Python dependencies
-  sokoprice.db             SQLite database (auto-created)
-  Best_model/
-    model_xgb_tuned.pkl    Trained XGBoost model
-  encoders/
-    le_commodity.pkl       Commodity label encoder
-    le_market.pkl           Market label encoder
-  Data/                    Training data directory
-  notebook/
-    SokoPrice_model_training.ipynb   Model training notebook
-  frontend/
-    public/                Static assets (logos, market images)
-    src/
-      main.jsx             React application (all components)
-      styles.css           Global styles
-    package.json           Node dependencies
-    vite.config.js         Vite configuration
+SokoPrice/
+├── main.py
+├── database.py
+├── auth.py
+├── requirements.txt
+├── sokoprice.db
+├── Best_model/
+│   └── model_xgb_tuned.pkl
+├── encoders/
+│   ├── le_commodity.pkl
+│   └── le_market.pkl
+├── Data/
+│   └── wfp_food_prices_ken.csv
+├── notebook/
+│   └── SokoPrice_V2_Notebook.ipynb
+├── Visualizations/
+│   └── (viz1 to viz17 png files)
+├── sample_data/
+│   ├── kigali_prices_2024.csv
+│   ├── kigali_prices_2025.csv
+│   └── kigali_prices_2026.csv
+├── assets/
+│   └── testing/
+│       ├── android_market_seller_testing.jpeg
+│       ├── android_market_seller_testing_2.jpeg
+│       ├── ios_cost_estimator_testing.jpeg
+│       └── ios_price_forecast_testing.jpeg
+├── frontend/
+│   ├── src/
+│   │   ├── main.jsx
+│   │   └── styles.css
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── firebase.json
+└── .firebaserc
 ```
+**Author:** Nice Eva Karabaranga 
