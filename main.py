@@ -501,9 +501,9 @@ def list_conversations(current_user: dict = Depends(get_current_user)):
     uid = current_user["user_id"]
 
     if USE_POSTGRES:
-    rows = conn.execute(
-        """
-        WITH conversation_partners AS (
+        rows = conn.execute(
+            """
+            WITH conversation_partners AS (
             SELECT
                 CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END as partner_id,
                 created_at,
