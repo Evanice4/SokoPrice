@@ -1381,11 +1381,26 @@ function ChatWidget(){
   };
 
   const openChat=async(p)=>{
-    setPartner(p);setView('chat');setSendErr('');
-    const d=await get('/messages/'+p.partner_id);
-    if(d)setMessages(d.messages||[]);
-    setTimeout(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},100);
-  };
+  setView('chat');setSendErr('');
+  const d=await get('/messages/'+p.partner_id);
+  if(d&&d.messages&&d.messages.length>0){
+    setMessages(d.messages);
+    const otherMsg=d.messages.find(m=>m.sender_id!==user.id);
+    if(otherMsg){
+      setPartner({
+        partner_id:otherMsg.sender_id,
+        partner_name:otherMsg.sender_name,
+        partner_role:p.partner_role
+      });
+    }else{
+      setPartner(p);
+    }
+  }else{
+    setMessages([]);
+    setPartner(p);
+  }
+  setTimeout(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},100);
+};
 
   const sendMessage=async()=>{
     if(!text.trim()||!partner||!partner.partner_id)return;
