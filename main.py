@@ -1,9 +1,3 @@
-"""
-SokoPrice FastAPI Backend
-AI Grocery Price Forecasting for Kigali Informal Markets
-
-"""
-
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -23,7 +17,13 @@ from database import init_db, get_db
 from auth import (hash_password, verify_password, create_token,
                   get_current_user, require_admin, require_seller)
 
-# ── App ───────────────────────────────────────────────────────────────────────
+USE_POSTGRES = bool(os.getenv("DATABASE_URL"))
+
+def q(query: str) -> str:
+    if USE_POSTGRES:
+        return query.replace("?", "%s")
+    return query
+
 app = FastAPI(
     title="SokoPrice API",
     description=(
@@ -43,14 +43,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.on_event("startup")
 def startup():
     init_db()
     load_model()
 
-
-# ── Constants ─────────────────────────────────────────────────────────────────
 KES_TO_RWF = 10.0
 
 COMMODITIES = [
@@ -78,7 +75,6 @@ COMMODITY_MEDIANS_RWF = {
     "Bananas": 3100.0, "Spinach": 800.0, "Cabbage": 2200.0, "Flour": 3800.0
 }
 
-# ── Model loading ─────────────────────────────────────────────────────────────
 model = scaler_X = scaler_y = None
 COMMODITY_ENC = {}
 MARKET_ENC    = {}
@@ -100,46 +96,29 @@ def load_model():
         print(f"Warning: model not loaded - {e}")
 
 
-# ── Prediction helpers ────────────────────────────────────────────────────────
 def get_recent_prices(commodity: str, market: str, n: int = 12) -> list:
-    """Fetch recent real prices from all available sources:
-    1. Admin-uploaded price_records (highest priority)
-    2. Approved seller submissions (also in price_records with source='seller_submission')
-    3. Active seller product listings
-    Falls back to commodity median with small noise if insufficient data."""
     conn = get_db()
-
-    # 1. Price records (includes both admin uploads and approved seller submissions)
     rows = conn.execute(
-        """SELECT price_rwf, price_date FROM price_records
+        q("""SELECT price_rwf, price_date FROM price_records
            WHERE commodity=? AND market=?
-           ORDER BY price_date DESC LIMIT ?""",
+           ORDER BY price_date DESC LIMIT ?"""),
         (commodity, market, n)
     ).fetchall()
-
-    # 2. Also pull from active seller product listings for additional recency
     seller_rows = conn.execute(
-        """SELECT price_rwf, updated_at as price_date FROM products
+        q("""SELECT price_rwf, updated_at as price_date FROM products
            WHERE commodity=? AND market=? AND status='active'
-           ORDER BY updated_at DESC LIMIT ?""",
+           ORDER BY updated_at DESC LIMIT ?"""),
         (commodity, market, n)
     ).fetchall()
-
-    # 3. Recently approved submissions not yet in price_records (edge case safety net)
     approved_rows = conn.execute(
-        """SELECT price_rwf, created_at as price_date FROM pending_price_submissions
+        q("""SELECT price_rwf, created_at as price_date FROM pending_price_submissions
            WHERE commodity=? AND market=? AND status='approved'
-           ORDER BY created_at DESC LIMIT ?""",
+           ORDER BY created_at DESC LIMIT ?"""),
         (commodity, market, n)
     ).fetchall()
-
     conn.close()
-
-    # Combine all sources, sort by date descending, take newest n (deduplicated by price_date)
     combined = list(rows) + list(seller_rows) + list(approved_rows)
     combined.sort(key=lambda r: r["price_date"], reverse=True)
-
-    # Deduplicate by date (keep first occurrence = highest priority source)
     seen_dates = set()
     unique = []
     for r in combined:
@@ -147,11 +126,8 @@ def get_recent_prices(commodity: str, market: str, n: int = 12) -> list:
             seen_dates.add(r["price_date"])
             unique.append(r)
     unique = unique[:n]
-
     if len(unique) >= 6:
         return [r["price_rwf"] for r in reversed(unique)]
-
-    # Fallback: use commodity median with small noise
     base = COMMODITY_MEDIANS_RWF.get(commodity, 2000.0)
     np.random.seed(42)
     return [base * (1 + np.random.uniform(-0.05, 0.05)) for _ in range(12)]
@@ -166,14 +142,11 @@ def build_features(commodity, market, forecast_date, price_history=None):
     month_cos   = np.cos(2 * np.pi * month / 12)
     ce = COMMODITY_ENC.get(commodity, 0)
     me = MARKET_ENC.get(market, 0)
-
     ph = price_history or get_recent_prices(commodity, market)
-
     lag1 = ph[-1] if len(ph) >= 1 else COMMODITY_MEDIANS_RWF.get(commodity, 2000)
     lag2 = ph[-2] if len(ph) >= 2 else lag1
     lag3 = ph[-3] if len(ph) >= 3 else lag1
     lag6 = ph[-6] if len(ph) >= 6 else lag1
-
     rm3  = np.mean(ph[-3:])  if len(ph) >= 3  else lag1
     rm6  = np.mean(ph[-6:])  if len(ph) >= 6  else lag1
     rm12 = np.mean(ph[-12:]) if len(ph) >= 12 else lag1
@@ -181,14 +154,12 @@ def build_features(commodity, market, forecast_date, price_history=None):
     rs6  = np.std(ph[-6:])   if len(ph) >= 6  else 0.0
     p1m  = (ph[-1]-ph[-2])/ph[-2] if len(ph) >= 2 and ph[-2] else 0.0
     p3m  = (ph[-1]-ph[-4])/ph[-4] if len(ph) >= 4 and ph[-4] else 0.0
-
     return np.array([[year, month_sin, month_cos, quarter, day_of_year,
                       lag1, lag2, lag3, lag6,
                       rm3, rm6, rm12, rs3, rs6, p1m, p3m, ce, me]])
 
 
-# ── Prediction cache ───────────────────────────────────────────────────────────
-_PRED_CACHE: dict = {}        # key: (commodity, market, forecast_date) -> (timestamp, price)
+_PRED_CACHE: dict = {}
 
 
 def run_prediction(commodity, market, forecast_date):
@@ -196,14 +167,12 @@ def run_prediction(commodity, market, forecast_date):
     now_ts = datetime.utcnow().timestamp()
     if cache_key in _PRED_CACHE:
         cached_ts, cached_price = _PRED_CACHE[cache_key]
-        if now_ts - cached_ts < 300:  # 5-minute cache
+        if now_ts - cached_ts < 300:
             return cached_price
     if not MODELS_OK:
         return COMMODITY_MEDIANS_RWF.get(commodity, 2000.0)
     features = build_features(commodity, market, forecast_date)
     pred_rwf = model.predict(features)[0]
-    # Model was trained on RWF data — output is already in RWF.
-    # Clamp negative predictions to 0 and fall back to median if unreasonable.
     price = round(max(float(pred_rwf), 0.0), 2)
     median = COMMODITY_MEDIANS_RWF.get(commodity, 2000.0)
     if price < median * 0.1 or price > median * 10:
@@ -221,7 +190,6 @@ def get_trend(commodity, market, forecast_date):
     return "stable"
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────────
 class RegisterRequest(BaseModel):
     name    : str
     email   : str
@@ -282,27 +250,23 @@ class ProductUpdate(BaseModel):
     quantity_kg : Optional[float] = None
     status      : Optional[str]   = None
 
-
 class SendMessageRequest(BaseModel):
     receiver_id: int
     message    : str
     product_id : Optional[int] = None
 
-
 class SubmitPriceRequest(BaseModel):
     commodity : str
     market    : str
     price_rwf : float
-    price_date: str  # YYYY-MM-DD
+    price_date: str
 
 
-# ── Auth endpoints ────────────────────────────────────────────────────────────
 @app.post("/auth/register", tags=["Auth"])
 def register(req: RegisterRequest):
-    """Register a new user (consumer or seller)."""
     conn = get_db()
     existing = conn.execute(
-        "SELECT id FROM users WHERE email=?", (req.email,)
+        q("SELECT id FROM users WHERE email=?"), (req.email,)
     ).fetchone()
     if existing:
         conn.close()
@@ -311,12 +275,12 @@ def register(req: RegisterRequest):
         conn.close()
         raise HTTPException(400, "Role must be consumer or seller")
     conn.execute(
-        "INSERT INTO users(name,email,password,role,market,created_at) VALUES(?,?,?,?,?,?)",
+        q("INSERT INTO users(name,email,password,role,market,created_at) VALUES(?,?,?,?,?,?)"),
         (req.name, req.email, hash_password(req.password),
          req.role, req.market, datetime.utcnow().isoformat())
     )
     conn.commit()
-    user = conn.execute("SELECT * FROM users WHERE email=?", (req.email,)).fetchone()
+    user = conn.execute(q("SELECT * FROM users WHERE email=?"), (req.email,)).fetchone()
     conn.close()
     token = create_token(user["id"], user["email"], user["role"])
     return {"token": token, "user": {
@@ -328,10 +292,9 @@ def register(req: RegisterRequest):
 
 @app.post("/auth/login", tags=["Auth"])
 def login(req: LoginRequest):
-    """Login and receive a JWT token."""
     conn = get_db()
     user = conn.execute(
-        "SELECT * FROM users WHERE email=?", (req.email,)
+        q("SELECT * FROM users WHERE email=?"), (req.email,)
     ).fetchone()
     conn.close()
     if not user or not verify_password(req.password, user["password"]):
@@ -348,10 +311,9 @@ def login(req: LoginRequest):
 
 @app.get("/auth/me", tags=["Auth"])
 def me(current_user: dict = Depends(get_current_user)):
-    """Get current user info from token."""
     conn = get_db()
     user = conn.execute(
-        "SELECT id,name,email,role,market,created_at FROM users WHERE id=?",
+        q("SELECT id,name,email,role,market,created_at FROM users WHERE id=?"),
         (current_user["user_id"],)
     ).fetchone()
     conn.close()
@@ -360,10 +322,8 @@ def me(current_user: dict = Depends(get_current_user)):
     return dict(user)
 
 
-# ── Core endpoints ────────────────────────────────────────────────────────────
 @app.get("/", tags=["Health"])
 def root():
-    """Health check."""
     return {
         "status"       : "SokoPrice API is running",
         "version"      : "2.0.0",
@@ -387,7 +347,6 @@ def list_markets():
 
 @app.post("/predict", response_model=PredictResponse, tags=["Forecasting"])
 def predict(req: PredictRequest):
-    """Forecast price for a commodity at a Kigali market."""
     if req.commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {req.commodity}")
     if req.market not in MARKETS:
@@ -397,22 +356,19 @@ def predict(req: PredictRequest):
         raise HTTPException(400, "Forecast date must be within 7 days")
     if days_ahead < 0:
         raise HTTPException(400, "Forecast date cannot be in the past")
-
     price = run_prediction(req.commodity, req.market, req.forecast_date)
     trend = get_trend(req.commodity, req.market, req.forecast_date)
-
     conn = get_db()
     has_real_data = conn.execute(
-        "SELECT COUNT(*) as c FROM price_records WHERE commodity=? AND market=?",
+        q("SELECT COUNT(*) as c FROM price_records WHERE commodity=? AND market=?"),
         (req.commodity, req.market)
     ).fetchone()["c"] > 5
     conn.execute(
-        "INSERT INTO forecast_log(commodity,market,forecast_date,predicted_rwf,created_at) VALUES(?,?,?,?,?)",
+        q("INSERT INTO forecast_log(commodity,market,forecast_date,predicted_rwf,created_at) VALUES(?,?,?,?,?)"),
         (req.commodity, req.market, str(req.forecast_date), price, datetime.utcnow().isoformat())
     )
     conn.commit()
     conn.close()
-
     return PredictResponse(
         commodity           = req.commodity,
         market              = req.market,
@@ -428,7 +384,6 @@ def predict(req: PredictRequest):
 
 @app.post("/recommend", response_model=List[MarketRec], tags=["Recommendations"])
 def recommend(req: RecommendRequest):
-    """Rank all markets by predicted price for a commodity."""
     if req.commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {req.commodity}")
     prices = []
@@ -451,7 +406,6 @@ def recommend(req: RecommendRequest):
 
 @app.post("/basket", tags=["Shopping"])
 def basket(req: BasketRequest):
-    """Estimate total cost of a grocery basket."""
     if req.market not in MARKETS:
         raise HTTPException(400, f"Unsupported market: {req.market}")
     items, total = [], 0.0
@@ -470,7 +424,6 @@ def basket(req: BasketRequest):
 
 @app.get("/alerts/{commodity}", tags=["Alerts"])
 def alerts(commodity: str, threshold_kes: float = 1000.0, market: str = "Kimironko"):
-    """Check if predicted price exceeds budget threshold."""
     if commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {commodity}")
     if market not in MARKETS:
@@ -490,48 +443,38 @@ def alerts(commodity: str, threshold_kes: float = 1000.0, market: str = "Kimiron
     }
 
 
-# ── Chat / Messaging ──────────────────────────────────────────────────────────
 @app.post("/messages/send", tags=["Messages"])
 def send_message(req: SendMessageRequest,
                  current_user: dict = Depends(get_current_user)):
-    """Send a message to another user (buyer ↔ seller chat)."""
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot send messages")
     if req.receiver_id == current_user["user_id"]:
         raise HTTPException(400, "Cannot message yourself")
-
     conn = get_db()
-
     receiver = conn.execute(
-        "SELECT id, role FROM users WHERE id=?",
-        (req.receiver_id,)
+        q("SELECT id, role FROM users WHERE id=?"), (req.receiver_id,)
     ).fetchone()
     if not receiver:
         conn.close()
         raise HTTPException(404, "Receiver not found")
-
-    # Ensure sender/receiver roles match expected chat pairing:
-    # - consumer -> seller
-    # - seller   -> consumer
     if current_user["role"] == "consumer" and receiver["role"] != "seller":
         conn.close()
         raise HTTPException(400, "Consumers can only message sellers")
     if current_user["role"] == "seller" and receiver["role"] != "consumer":
         conn.close()
         raise HTTPException(400, "Sellers can only message consumers")
-
     now = datetime.utcnow().isoformat()
     cursor = conn.execute(
-        """INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
-           VALUES(?,?,?,?,0,?)""",
+        q("""INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
+           VALUES(?,?,?,?,0,?)"""),
         (current_user["user_id"], req.receiver_id, req.product_id, req.message, now)
     )
     conn.commit()
     msg_id = cursor.lastrowid
     msg = conn.execute(
-        """SELECT m.*, u.name as sender_name
+        q("""SELECT m.*, u.name as sender_name
            FROM messages m JOIN users u ON m.sender_id = u.id
-           WHERE m.id=?""", (msg_id,)
+           WHERE m.id=?"""), (msg_id,)
     ).fetchone()
     conn.close()
     return dict(msg)
@@ -539,88 +482,44 @@ def send_message(req: SendMessageRequest,
 
 @app.get("/messages/conversations", tags=["Messages"])
 def list_conversations(current_user: dict = Depends(get_current_user)):
-    """List users you've exchanged messages with, with last message + unread count.
-
-    Conversation identity is standardized as an unordered pair of user IDs (uid <-> partner_id),
-    derived from both sender_id and receiver_id stored in messages.
-    """
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     uid = current_user["user_id"]
-
-    # Build conversations as: partner_id = other user in (sender_id, receiver_id) pair.
     rows = conn.execute(
-        """
+        q("""
         SELECT
-          partner_id,
-          u.name as partner_name,
-          u.role as partner_role,
-          (
-            SELECT m2.message
-            FROM messages m2
-            WHERE
-              (m2.sender_id = uid AND m2.receiver_id = partner_id)
-              OR
-              (m2.sender_id = partner_id AND m2.receiver_id = uid)
-            ORDER BY m2.created_at DESC
-            LIMIT 1
-          ) as last_message,
-          (
-            SELECT m3.created_at
-            FROM messages m3
-            WHERE
-              (m3.sender_id = uid AND m3.receiver_id = partner_id)
-              OR
-              (m3.sender_id = partner_id AND m3.receiver_id = uid)
-            ORDER BY m3.created_at DESC
-            LIMIT 1
-          ) as last_time,
-          (
-            SELECT COUNT(*)
-            FROM messages m4
-            WHERE
-              m4.sender_id = partner_id
-              AND m4.receiver_id = uid
-              AND m4.read = 0
-          ) as unread
-        FROM (
-          SELECT
-            CASE
-              WHEN sender_id = ? THEN receiver_id
-              ELSE sender_id
-            END as partner_id
-          FROM messages
-          WHERE sender_id = ? OR receiver_id = ?
-          GROUP BY partner_id
-        ) p
-        JOIN users u ON u.id = p.partner_id
+            CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as partner_id,
+            u.name as partner_name,
+            u.role as partner_role,
+            MAX(created_at) as last_time,
+            (SELECT message FROM messages m2
+             WHERE (m2.sender_id=m.sender_id AND m2.receiver_id=m.receiver_id)
+                OR (m2.sender_id=m.receiver_id AND m2.receiver_id=m.sender_id)
+             ORDER BY m2.created_at DESC LIMIT 1) as last_message,
+            SUM(CASE WHEN sender_id != ? AND read=0 THEN 1 ELSE 0 END) as unread
+        FROM messages m
+        JOIN users u ON u.id = CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END
+        WHERE sender_id = ? OR receiver_id = ?
+        GROUP BY partner_id
         ORDER BY last_time DESC
-        """,
-        (uid, uid, uid)
+        """),
+        (uid, uid, uid, uid, uid)
     ).fetchall()
     conn.close()
     return {"conversations": [dict(r) for r in rows]}
 
 
-# IMPORTANT: Declare static routes BEFORE dynamic routes like /messages/{partner_id}
-# to prevent FastAPI from interpreting "unread-count" as partner_id.
 @app.get("/messages/unread-count", tags=["Messages"])
 def unread_count(
     partner_id: Optional[int] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get total unread message count for badge display.
-
-    `partner_id` is accepted for backward/forward compatibility with any
-    frontend variants that may pass it as a query parameter.
-    """
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
-
     conn = get_db()
     row = conn.execute(
-        "SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0",
+        q("SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0"),
         (current_user["user_id"],)
     ).fetchone()
     conn.close()
@@ -630,25 +529,21 @@ def unread_count(
 @app.get("/messages/{partner_id}", tags=["Messages"])
 def get_conversation(partner_id: int,
                      current_user: dict = Depends(get_current_user)):
-    """Get full conversation history with a specific user."""
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     uid = current_user["user_id"]
-
-    # Mark unread messages from this partner as read (directional: partner -> me)
     conn.execute(
-        "UPDATE messages SET read=1 WHERE sender_id=? AND receiver_id=? AND read=0",
+        q("UPDATE messages SET read=1 WHERE sender_id=? AND receiver_id=? AND read=0"),
         (partner_id, uid)
     )
     conn.commit()
-
     rows = conn.execute(
-        """SELECT m.*, u.name as sender_name
+        q("""SELECT m.*, u.name as sender_name
            FROM messages m JOIN users u ON m.sender_id = u.id
            WHERE (m.sender_id=? AND m.receiver_id=?)
               OR (m.sender_id=? AND m.receiver_id=?)
-           ORDER BY m.created_at ASC""",
+           ORDER BY m.created_at ASC"""),
         (uid, partner_id, partner_id, uid)
     ).fetchall()
     conn.close()
@@ -658,12 +553,11 @@ def get_conversation(partner_id: int,
 @app.post("/messages/{message_id}/read", tags=["Messages"])
 def mark_read(message_id: int,
               current_user: dict = Depends(get_current_user)):
-    """Mark a specific message as read."""
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     conn.execute(
-        "UPDATE messages SET read=1 WHERE id=? AND receiver_id=?",
+        q("UPDATE messages SET read=1 WHERE id=? AND receiver_id=?"),
         (message_id, current_user["user_id"])
     )
     conn.commit()
@@ -671,20 +565,17 @@ def mark_read(message_id: int,
     return {"status": "ok"}
 
 
-# ── Seller endpoints ──────────────────────────────────────────────────────────
 @app.get("/seller/products", tags=["Seller"])
 def seller_products(current_user: dict = Depends(require_seller)):
-    """Get all products listed by the logged-in seller."""
     conn = get_db()
     rows = conn.execute(
-        """SELECT p.*, u.name as seller_name
+        q("""SELECT p.*, u.name as seller_name
            FROM products p JOIN users u ON p.seller_id = u.id
-           WHERE p.seller_id=? ORDER BY p.created_at DESC""",
+           WHERE p.seller_id=? ORDER BY p.created_at DESC"""),
         (current_user["user_id"],)
     ).fetchall()
     conn.close()
     products = [dict(r) for r in rows]
-    # Enrich with AI price comparison
     today = date.today()
     for p in products:
         ai_price = run_prediction(p["commodity"], p["market"], today)
@@ -701,7 +592,6 @@ def seller_products(current_user: dict = Depends(require_seller)):
 @app.post("/seller/products", tags=["Seller"])
 def create_product(req: ProductCreate,
                    current_user: dict = Depends(require_seller)):
-    """List a new product."""
     if req.commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {req.commodity}")
     if req.market not in MARKETS:
@@ -709,15 +599,15 @@ def create_product(req: ProductCreate,
     now = datetime.utcnow().isoformat()
     conn = get_db()
     cursor = conn.execute(
-        """INSERT INTO products(seller_id,commodity,market,price_rwf,unit,
+        q("""INSERT INTO products(seller_id,commodity,market,price_rwf,unit,
            quantity_kg,status,created_at,updated_at)
-           VALUES(?,?,?,?,?,?,?,?,?)""",
+           VALUES(?,?,?,?,?,?,?,?,?)"""),
         (current_user["user_id"], req.commodity, req.market, req.price_rwf,
          req.unit, req.quantity_kg, "active", now, now)
     )
     product_id = cursor.lastrowid
     conn.commit()
-    product = conn.execute("SELECT * FROM products WHERE id=?", (product_id,)).fetchone()
+    product = conn.execute(q("SELECT * FROM products WHERE id=?"), (product_id,)).fetchone()
     conn.close()
     return dict(product)
 
@@ -725,10 +615,9 @@ def create_product(req: ProductCreate,
 @app.put("/seller/products/{product_id}", tags=["Seller"])
 def update_product(product_id: int, req: ProductUpdate,
                    current_user: dict = Depends(require_seller)):
-    """Update a product price or status. Price changes also feed into the AI model."""
     conn = get_db()
     product = conn.execute(
-        "SELECT * FROM products WHERE id=? AND seller_id=?",
+        q("SELECT * FROM products WHERE id=? AND seller_id=?"),
         (product_id, current_user["user_id"])
     ).fetchone()
     if not product:
@@ -746,23 +635,23 @@ def update_product(product_id: int, req: ProductUpdate,
         updates.append("status=?"); values.append(req.status)
     updates.append("updated_at=?"); values.append(datetime.utcnow().isoformat())
     values.append(product_id)
-    conn.execute(f"UPDATE products SET {','.join(updates)} WHERE id=?", values)
-
-    # When price changes, also create a pending price submission for admin review
-    # so the new price feeds into the AI model after approval
+    if USE_POSTGRES:
+        update_sql = f"UPDATE products SET {','.join(u.replace('=?','=%s') for u in updates)} WHERE id=%s"
+    else:
+        update_sql = f"UPDATE products SET {','.join(updates)} WHERE id=?"
+    conn.execute(update_sql, values)
     if price_changed:
         now = datetime.utcnow().isoformat()
         conn.execute(
-            """INSERT INTO pending_price_submissions
+            q("""INSERT INTO pending_price_submissions
                (seller_id, commodity, market, price_rwf, price_date, status, created_at)
-               VALUES(?,?,?,?,?,'pending',?)""",
+               VALUES(?,?,?,?,?,'pending',?)"""),
             (current_user["user_id"], product["commodity"], product["market"],
              req.price_rwf, datetime.utcnow().strftime("%Y-%m-%d"), now)
         )
     conn.commit()
-    updated = conn.execute("SELECT * FROM products WHERE id=?", (product_id,)).fetchone()
+    updated = conn.execute(q("SELECT * FROM products WHERE id=?"), (product_id,)).fetchone()
     conn.close()
-    # Invalidate prediction cache so model picks up new data
     _PRED_CACHE.clear()
     return dict(updated)
 
@@ -770,16 +659,15 @@ def update_product(product_id: int, req: ProductUpdate,
 @app.delete("/seller/products/{product_id}", tags=["Seller"])
 def delete_product(product_id: int,
                    current_user: dict = Depends(require_seller)):
-    """Delete a product listing."""
     conn = get_db()
     product = conn.execute(
-        "SELECT id FROM products WHERE id=? AND seller_id=?",
+        q("SELECT id FROM products WHERE id=? AND seller_id=?"),
         (product_id, current_user["user_id"])
     ).fetchone()
     if not product:
         conn.close()
         raise HTTPException(404, "Product not found or not yours")
-    conn.execute("DELETE FROM products WHERE id=?", (product_id,))
+    conn.execute(q("DELETE FROM products WHERE id=?"), (product_id,))
     conn.commit()
     conn.close()
     return {"message": "Product deleted"}
@@ -788,7 +676,6 @@ def delete_product(product_id: int,
 @app.post("/seller/submit-price", tags=["Seller"])
 def seller_submit_price(req: SubmitPriceRequest,
                         current_user: dict = Depends(require_seller)):
-    """Submit a real market price for admin approval. Once approved, it feeds into the AI model."""
     if req.commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {req.commodity}")
     if req.market not in MARKETS:
@@ -796,29 +683,27 @@ def seller_submit_price(req: SubmitPriceRequest,
     now = datetime.utcnow().isoformat()
     conn = get_db()
     conn.execute(
-        """INSERT INTO pending_price_submissions
+        q("""INSERT INTO pending_price_submissions
            (seller_id, commodity, market, price_rwf, price_date, status, created_at)
-           VALUES(?,?,?,?,?,'pending',?)""",
+           VALUES(?,?,?,?,?,'pending',?)"""),
         (current_user["user_id"], req.commodity, req.market,
          req.price_rwf, req.price_date, now)
     )
     conn.commit()
     conn.close()
-    # Invalidate prediction cache so next forecast picks up new data
     _PRED_CACHE.clear()
     return {"message": "Price submitted for admin review. It will feed into the AI model once approved."}
 
 
 @app.get("/seller/submissions", tags=["Seller"])
 def seller_submissions(current_user: dict = Depends(require_seller)):
-    """Get all price submissions by the logged-in seller with their approval status."""
     conn = get_db()
     rows = conn.execute(
-        """SELECT ps.*, u.name as reviewer_name
+        q("""SELECT ps.*, u.name as reviewer_name
            FROM pending_price_submissions ps
            LEFT JOIN users u ON ps.reviewed_by = u.id
            WHERE ps.seller_id = ?
-           ORDER BY ps.created_at DESC""",
+           ORDER BY ps.created_at DESC"""),
         (current_user["user_id"],)
     ).fetchall()
     conn.close()
@@ -828,7 +713,6 @@ def seller_submissions(current_user: dict = Depends(require_seller)):
 @app.get("/seller/insights/{commodity}", tags=["Seller"])
 def seller_insights(commodity: str,
                     current_user: dict = Depends(require_seller)):
-    """Get AI price insight and market comparison for a commodity."""
     if commodity not in COMMODITIES:
         raise HTTPException(400, f"Unsupported commodity: {commodity}")
     today = date.today()
@@ -849,10 +733,8 @@ def seller_insights(commodity: str,
     }
 
 
-# ── Public products ────────────────────────────────────────────────────────────
 @app.get("/products", tags=["Catalog"])
 def public_products(market: Optional[str] = None, commodity: Optional[str] = None):
-    """Get all active seller listings, optionally filtered."""
     conn = get_db()
     query  = "SELECT p.*, u.name as seller_name FROM products p JOIN users u ON p.seller_id=u.id WHERE p.status='active'"
     params = []
@@ -861,15 +743,13 @@ def public_products(market: Optional[str] = None, commodity: Optional[str] = Non
     if commodity:
         query += " AND p.commodity=?"; params.append(commodity)
     query += " ORDER BY p.price_rwf ASC"
-    rows = conn.execute(query, params).fetchall()
+    rows = conn.execute(q(query), params).fetchall()
     conn.close()
     return {"products": [dict(r) for r in rows]}
 
 
-# ── Admin endpoints ───────────────────────────────────────────────────────────
 @app.get("/admin/stats", tags=["Admin"])
 def admin_stats(current_user: dict = Depends(require_admin)):
-    """Platform-wide statistics."""
     conn = get_db()
     total_users     = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
     total_sellers   = conn.execute("SELECT COUNT(*) as c FROM users WHERE role='seller'").fetchone()["c"]
@@ -896,7 +776,6 @@ def admin_stats(current_user: dict = Depends(require_admin)):
 
 @app.get("/admin/users", tags=["Admin"])
 def admin_users(current_user: dict = Depends(require_admin)):
-    """List all users."""
     conn = get_db()
     users = conn.execute(
         "SELECT id,name,email,role,market,active,created_at FROM users ORDER BY created_at DESC"
@@ -907,14 +786,13 @@ def admin_users(current_user: dict = Depends(require_admin)):
 
 @app.put("/admin/users/{user_id}/suspend", tags=["Admin"])
 def suspend_user(user_id: int, current_user: dict = Depends(require_admin)):
-    """Suspend or reactivate a user."""
     conn = get_db()
-    user = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    user = conn.execute(q("SELECT * FROM users WHERE id=?"), (user_id,)).fetchone()
     if not user:
         conn.close()
         raise HTTPException(404, "User not found")
     new_status = 0 if user["active"] else 1
-    conn.execute("UPDATE users SET active=? WHERE id=?", (new_status, user_id))
+    conn.execute(q("UPDATE users SET active=? WHERE id=?"), (new_status, user_id))
     conn.commit()
     conn.close()
     return {"message": "User suspended" if new_status == 0 else "User reactivated",
@@ -923,7 +801,6 @@ def suspend_user(user_id: int, current_user: dict = Depends(require_admin)):
 
 @app.get("/admin/products", tags=["Admin"])
 def admin_products(current_user: dict = Depends(require_admin)):
-    """List all seller products."""
     conn = get_db()
     rows = conn.execute(
         """SELECT p.*, u.name as seller_name, u.email as seller_email
@@ -939,11 +816,6 @@ async def upload_prices(
     file: UploadFile = File(...),
     current_user: dict = Depends(require_admin)
 ):
-    """
-    Upload a CSV file of real market prices to improve predictions.
-
-    CSV format: commodity, market, price_rwf, price_date (YYYY-MM-DD)
-    """
     if not file.filename.endswith(".csv"):
         raise HTTPException(400, "Only CSV files accepted")
     content = await file.read()
@@ -966,9 +838,9 @@ async def upload_prices(
         try:
             price = float(row["price_rwf"])
             conn.execute(
-                """INSERT INTO price_records
+                q("""INSERT INTO price_records
                    (commodity,market,price_rwf,price_date,source,uploaded_by,created_at)
-                   VALUES(?,?,?,?,?,?,?)""",
+                   VALUES(?,?,?,?,?,?,?)"""),
                 (row["commodity"], row["market"], price,
                  row["price_date"], "upload", current_user["user_id"], now)
             )
@@ -977,7 +849,6 @@ async def upload_prices(
             errors.append(f"Row {i}: {e}")
     conn.commit()
     conn.close()
-    # Invalidate prediction cache so model uses new data immediately
     _PRED_CACHE.clear()
     return {
         "rows_added": rows_added,
@@ -988,47 +859,28 @@ async def upload_prices(
 
 @app.post("/admin/retrain", tags=["Admin"])
 def retrain_model(current_user: dict = Depends(require_admin)):
-    """
-    Retrain the XGBoost model on all real price data in the database.
-    Returns new model metrics (MAPE, R², RMSE, samples used).
-    The model is saved and immediately used for all future predictions.
-    """
     try:
         import xgboost as xgb
         from sklearn.model_selection import train_test_split
         from sklearn.metrics import mean_absolute_percentage_error, r2_score, mean_squared_error
     except ImportError as e:
         raise HTTPException(500, f"ML dependency missing: {e}")
-
     conn = get_db()
     rows = conn.execute(
         """SELECT commodity, market, price_rwf, price_date FROM price_records
            ORDER BY commodity, market, price_date ASC"""
     ).fetchall()
     conn.close()
-
     if len(rows) < 30:
-        raise HTTPException(
-            400,
-            f"Need at least 30 price records to retrain. Currently have {len(rows)}. "
-            "Upload more data via CSV or approve more seller submissions."
-        )
-
-    # Group by (commodity, market) to build per-series price histories
+        raise HTTPException(400, f"Need at least 30 price records to retrain. Currently have {len(rows)}.")
     from collections import defaultdict
     series = defaultdict(list)
     for r in rows:
-        series[(r["commodity"], r["market"])].append({
-            "price": r["price_rwf"],
-            "date": r["price_date"]
-        })
-
-    # Build training samples: for each date with enough history, compute features → target
+        series[(r["commodity"], r["market"])].append({"price": r["price_rwf"], "date": r["price_date"]})
     X_list, y_list = [], []
     for (commodity, market), prices in series.items():
         prices.sort(key=lambda p: p["date"])
         for i in range(12, len(prices)):
-            # Use prior 12 months of prices as history for this prediction point
             hist = [p["price"] for p in prices[:i]]
             target = prices[i]["price"]
             target_date_str = prices[i]["date"]
@@ -1036,55 +888,31 @@ def retrain_model(current_user: dict = Depends(require_admin)):
                 target_date = datetime.strptime(target_date_str, "%Y-%m-%d")
             except ValueError:
                 continue
-
-            # Build features from the history available BEFORE the target date
             features = build_features(commodity, market, target_date, hist)
             if features is not None and target > 0:
                 X_list.append(features[0])
                 y_list.append(target)
-
     if len(X_list) < 20:
-        raise HTTPException(
-            400,
-            f"Only {len(X_list)} training samples could be built (need ≥20). "
-            "Upload more price data spanning more dates per commodity-market pair."
-        )
-
+        raise HTTPException(400, f"Only {len(X_list)} training samples could be built (need 20+).")
     X = np.array(X_list)
     y = np.array(y_list)
-
-    # Train / test split (chronological, so no shuffle to avoid leakage)
     split_idx = int(len(X) * 0.85)
     X_train, X_test = X[:split_idx], X[split_idx:]
     y_train, y_test = y[:split_idx], y[split_idx:]
-
-    # Train XGBoost with same hyperparameters as the original tuned model
     new_model = xgb.XGBRegressor(
-        n_estimators=300,
-        max_depth=6,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        n_jobs=-1
+        n_estimators=300, max_depth=6, learning_rate=0.05,
+        subsample=0.8, colsample_bytree=0.8, random_state=42, n_jobs=-1
     )
     new_model.fit(X_train, y_train)
-
-    # Evaluate
     y_pred = new_model.predict(X_test)
     mape = mean_absolute_percentage_error(y_test, y_pred) * 100
     r2 = r2_score(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-
-    # Save new model
     global model, MODELS_OK
     joblib.dump(new_model, "Best_model/model_xgb_tuned.pkl")
     model = new_model
     MODELS_OK = True
-
-    # Clear prediction cache so all predictions use the retrained model
     _PRED_CACHE.clear()
-
     return {
         "message": "Model retrained successfully",
         "samples_used": len(X_train),
@@ -1103,7 +931,6 @@ def admin_price_records(
     market   : Optional[str] = None,
     current_user: dict = Depends(require_admin)
 ):
-    """View uploaded price records."""
     conn  = get_db()
     query = "SELECT * FROM price_records WHERE 1=1"
     params = []
@@ -1112,14 +939,13 @@ def admin_price_records(
     if market:
         query += " AND market=?"; params.append(market)
     query += " ORDER BY price_date DESC LIMIT 100"
-    rows = conn.execute(query, params).fetchall()
+    rows = conn.execute(q(query), params).fetchall()
     conn.close()
     return {"records": [dict(r) for r in rows]}
 
 
 @app.get("/admin/pending-submissions", tags=["Admin"])
 def admin_pending_submissions(current_user: dict = Depends(require_admin)):
-    """List all pending price submissions from sellers awaiting review."""
     conn = get_db()
     rows = conn.execute(
         """SELECT ps.*, u.name as seller_name, u.email as seller_email
@@ -1135,32 +961,28 @@ def admin_pending_submissions(current_user: dict = Depends(require_admin)):
 @app.post("/admin/approve-submission/{submission_id}", tags=["Admin"])
 def admin_approve_submission(submission_id: int,
                               current_user: dict = Depends(require_admin)):
-    """Approve a seller's price submission → inserts into price_records for model use."""
     conn = get_db()
     sub = conn.execute(
-        "SELECT * FROM pending_price_submissions WHERE id=? AND status='pending'",
+        q("SELECT * FROM pending_price_submissions WHERE id=? AND status='pending'"),
         (submission_id,)
     ).fetchone()
     if not sub:
         conn.close()
         raise HTTPException(404, "Submission not found or already processed")
     now = datetime.utcnow().isoformat()
-    # Insert into price_records so the model uses this data
     conn.execute(
-        """INSERT INTO price_records
+        q("""INSERT INTO price_records
            (commodity, market, price_rwf, price_date, source, uploaded_by, created_at)
-           VALUES(?,?,?,?,?,?,?)""",
+           VALUES(?,?,?,?,?,?,?)"""),
         (sub["commodity"], sub["market"], sub["price_rwf"],
          sub["price_date"], "seller_submission", sub["seller_id"], now)
     )
-    # Mark submission as approved
     conn.execute(
-        "UPDATE pending_price_submissions SET status='approved', reviewed_by=? WHERE id=?",
+        q("UPDATE pending_price_submissions SET status='approved', reviewed_by=? WHERE id=?"),
         (current_user["user_id"], submission_id)
     )
     conn.commit()
     conn.close()
-    # Invalidate prediction cache so model uses new data immediately
     _PRED_CACHE.clear()
     return {"message": "Submission approved. Price record added — model will use this data."}
 
@@ -1168,17 +990,16 @@ def admin_approve_submission(submission_id: int,
 @app.post("/admin/reject-submission/{submission_id}", tags=["Admin"])
 def admin_reject_submission(submission_id: int,
                              current_user: dict = Depends(require_admin)):
-    """Reject a seller's price submission."""
     conn = get_db()
     sub = conn.execute(
-        "SELECT * FROM pending_price_submissions WHERE id=? AND status='pending'",
+        q("SELECT * FROM pending_price_submissions WHERE id=? AND status='pending'"),
         (submission_id,)
     ).fetchone()
     if not sub:
         conn.close()
         raise HTTPException(404, "Submission not found or already processed")
     conn.execute(
-        "UPDATE pending_price_submissions SET status='rejected', reviewed_by=? WHERE id=?",
+        q("UPDATE pending_price_submissions SET status='rejected', reviewed_by=? WHERE id=?"),
         (current_user["user_id"], submission_id)
     )
     conn.commit()

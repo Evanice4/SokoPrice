@@ -8,3 +8,4 @@ pydantic==2.7.0
 python-multipart==0.0.9
 python-jose==3.3.0
 dill
+psycopg2-binary==2.9.9
