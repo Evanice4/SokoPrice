@@ -1,9 +1,3 @@
-"""
-SokoPrice Database
-Supports both PostgreSQL (production on Render) and SQLite (local development).
-PostgreSQL is used when DATABASE_URL environment variable is set.
-"""
-
 import os
 from datetime import datetime
 
@@ -11,43 +5,60 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 USE_POSTGRES = bool(DATABASE_URL)
 
 
+def q(query: str) -> str:
+    if USE_POSTGRES:
+        return query.replace("?", "%s")
+    return query
+
+
+class PGWrapper:
+    def __init__(self, raw_conn, cursor_factory):
+        self._conn = raw_conn
+        self._cur = raw_conn.cursor(cursor_factory=cursor_factory)
+
+    def execute(self, query, params=None):
+        if params is None:
+            self._cur.execute(query)
+        else:
+            self._cur.execute(query, params)
+        return self
+
+    def executescript(self, script):
+        for statement in script.strip().split(";"):
+            s = statement.strip()
+            if s:
+                self._cur.execute(s)
+        return self
+
+    def fetchone(self):
+        return self._cur.fetchone()
+
+    def fetchall(self):
+        return self._cur.fetchall()
+
+    def commit(self):
+        self._conn.commit()
+
+    def close(self):
+        try:
+            self._cur.close()
+            self._conn.close()
+        except Exception:
+            pass
+
+    @property
+    def lastrowid(self):
+        self._cur.execute("SELECT lastval()")
+        return self._cur.fetchone()[0]
+
+
 def get_db():
     if USE_POSTGRES:
         import psycopg2
         import psycopg2.extras
-
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = False
-
-        class PGWrapper:
-            def __init__(self, conn):
-                self._conn = conn
-                self._cur = conn.cursor(
-                    cursor_factory=psycopg2.extras.RealDictCursor
-                )
-
-            def execute(self, query, params=None):
-                self._cur.execute(query, params or ())
-                return self._cur
-
-            def fetchone(self):
-                return self._cur.fetchone()
-
-            def fetchall(self):
-                return self._cur.fetchall()
-
-            def commit(self):
-                self._conn.commit()
-
-            def close(self):
-                self._cur.close()
-                self._conn.close()
-
-            @property
-            def lastrowid(self):
-                return self._cur.fetchone()
-
-        return PGWrapper(conn)
+        raw = psycopg2.connect(DATABASE_URL)
+        raw.autocommit = False
+        return PGWrapper(raw, psycopg2.extras.RealDictCursor)
     else:
         import sqlite3
         DB_PATH = os.path.join(
@@ -60,18 +71,13 @@ def get_db():
         return conn
 
 
-def q(query: str) -> str:
-    """Convert SQLite ? placeholders to PostgreSQL %s when needed."""
-    if USE_POSTGRES:
-        return query.replace("?", "%s")
-    return query
-
-
 def init_db():
-    conn = get_db()
-
     if USE_POSTGRES:
-        cur = conn.cursor()
+        import psycopg2
+        import psycopg2.extras
+        raw = psycopg2.connect(DATABASE_URL)
+        cur = raw.cursor()
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -145,7 +151,6 @@ def init_db():
             )
         """)
 
-        # Seed admin
         cur.execute(
             "SELECT id FROM users WHERE email=%s", ("admin@sokoprice.rw",)
         )
@@ -158,12 +163,17 @@ def init_db():
                  hash_password("admin123"), "admin",
                  datetime.utcnow().isoformat())
             )
-        conn.commit()
+        raw.commit()
         cur.close()
-        conn.close()
+        raw.close()
 
     else:
         import sqlite3
+        DB_PATH = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "sokoprice.db"
+        )
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.executescript("""
             CREATE TABLE IF NOT EXISTS users (
