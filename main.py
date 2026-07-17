@@ -527,6 +527,17 @@ def list_conversations(current_user: dict = Depends(get_current_user)):
         """,
         (uid, uid, uid, uid)
     ).fetchall()
+@app.get("/messages/unread-count", tags=["Messages"])
+def unread_count(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] == "admin":
+        raise HTTPException(403, "Admins cannot access messages")
+    conn = get_db()
+    row = conn.execute(
+        q("SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0"),
+        (current_user["user_id"],)
+    ).fetchone()
+    conn.close()
+    return {"count": row["c"]}
 
 
 @app.get("/messages/{partner_id}", tags=["Messages"])
