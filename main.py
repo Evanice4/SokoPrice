@@ -493,51 +493,57 @@ def send_message(req: SendMessageRequest,
     conn.close()
     return result
 
-
 @app.get("/messages/conversations", tags=["Messages"])
 def list_conversations(current_user: dict = Depends(get_current_user)):
     if current_user["role"] == "admin":
         raise HTTPException(403, "Admins cannot access messages")
     conn = get_db()
     uid = current_user["user_id"]
-    rows = conn.execute(
-        q("""
-        SELECT
-            CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as partner_id,
-            u.name as partner_name,
-            u.role as partner_role,
-            MAX(created_at) as last_time,
-            (SELECT message FROM messages m2
-             WHERE (m2.sender_id=m.sender_id AND m2.receiver_id=m.receiver_id)
-                OR (m2.sender_id=m.receiver_id AND m2.receiver_id=m.sender_id)
-             ORDER BY m2.created_at DESC LIMIT 1) as last_message,
-            SUM(CASE WHEN sender_id != ? AND read=0 THEN 1 ELSE 0 END) as unread
-        FROM messages m
-        JOIN users u ON u.id = CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END
-        WHERE sender_id = ? OR receiver_id = ?
-        GROUP BY partner_id
-        ORDER BY last_time DESC
-        """),
-        (uid, uid, uid, uid, uid)
-    ).fetchall()
+
+    if USE_POSTGRES:
+        rows = conn.execute(
+            """
+            SELECT DISTINCT ON (partner_id)
+                CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END as partner_id,
+                u.name as partner_name,
+                u.role as partner_role,
+                created_at as last_time,
+                message as last_message,
+                (SELECT COUNT(*) FROM messages m2
+                 WHERE m2.receiver_id = %s
+                 AND m2.sender_id = CASE WHEN m.sender_id = %s THEN m.receiver_id ELSE m.sender_id END
+                 AND m2.read = 0) as unread
+            FROM messages m
+            JOIN users u ON u.id = CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END
+            WHERE sender_id = %s OR receiver_id = %s
+            ORDER BY partner_id, created_at DESC
+            """,
+            (uid, uid, uid, uid, uid, uid)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """
+            SELECT
+                CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as partner_id,
+                u.name as partner_name,
+                u.role as partner_role,
+                MAX(created_at) as last_time,
+                (SELECT message FROM messages m2
+                 WHERE (m2.sender_id=m.sender_id AND m2.receiver_id=m.receiver_id)
+                    OR (m2.sender_id=m.receiver_id AND m2.receiver_id=m.sender_id)
+                 ORDER BY m2.created_at DESC LIMIT 1) as last_message,
+                SUM(CASE WHEN sender_id != ? AND read=0 THEN 1 ELSE 0 END) as unread
+            FROM messages m
+            JOIN users u ON u.id = CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END
+            WHERE sender_id = ? OR receiver_id = ?
+            GROUP BY partner_id
+            ORDER BY last_time DESC
+            """,
+            (uid, uid, uid, uid, uid)
+        ).fetchall()
+
     conn.close()
     return {"conversations": [dict(r) for r in rows]}
-
-
-@app.get("/messages/unread-count", tags=["Messages"])
-def unread_count(
-    partner_id: Optional[int] = None,
-    current_user: dict = Depends(get_current_user)
-):
-    if current_user["role"] == "admin":
-        raise HTTPException(403, "Admins cannot access messages")
-    conn = get_db()
-    row = conn.execute(
-        q("SELECT COUNT(*) as c FROM messages WHERE receiver_id=? AND read=0"),
-        (current_user["user_id"],)
-    ).fetchone()
-    conn.close()
-    return {"count": row["c"]}
 
 
 @app.get("/messages/{partner_id}", tags=["Messages"])
