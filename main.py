@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from database import init_db, get_db, q
+from database import init_db, get_db
 from auth import (hash_password, verify_password, create_token,
                   get_current_user, require_admin, require_seller)
 
@@ -464,20 +464,34 @@ def send_message(req: SendMessageRequest,
         conn.close()
         raise HTTPException(400, "Sellers can only message consumers")
     now = datetime.utcnow().isoformat()
-    cursor = conn.execute(
-        q("""INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
-           VALUES(?,?,?,?,0,?)"""),
-        (current_user["user_id"], req.receiver_id, req.product_id, req.message, now)
-    )
-    conn.commit()
-    msg_id = cursor.lastrowid
-    msg = conn.execute(
-        q("""SELECT m.*, u.name as sender_name
-           FROM messages m JOIN users u ON m.sender_id = u.id
-           WHERE m.id=?"""), (msg_id,)
-    ).fetchone()
+    if USE_POSTGRES:
+        msg = conn.execute(
+            """INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
+               VALUES(%s,%s,%s,%s,0,%s)
+               RETURNING *""",
+            (current_user["user_id"], req.receiver_id, req.product_id, req.message, now)
+        ).fetchone()
+        sender = conn.execute(
+            "SELECT name FROM users WHERE id=%s", (current_user["user_id"],)
+        ).fetchone()
+        conn.commit()
+        result = dict(msg)
+        result["sender_name"] = sender["name"]
+    else:
+        cursor = conn.execute(
+            """INSERT INTO messages(sender_id, receiver_id, product_id, message, read, created_at)
+               VALUES(?,?,?,?,0,?)""",
+            (current_user["user_id"], req.receiver_id, req.product_id, req.message, now)
+        )
+        msg_id = cursor.lastrowid
+        conn.commit()
+        result = dict(conn.execute(
+            """SELECT m.*, u.name as sender_name
+               FROM messages m JOIN users u ON m.sender_id = u.id
+               WHERE m.id=?""", (msg_id,)
+        ).fetchone())
     conn.close()
-    return dict(msg)
+    return result
 
 
 @app.get("/messages/conversations", tags=["Messages"])
@@ -598,16 +612,29 @@ def create_product(req: ProductCreate,
         raise HTTPException(400, f"Unsupported market: {req.market}")
     now = datetime.utcnow().isoformat()
     conn = get_db()
-    cursor = conn.execute(
-        q("""INSERT INTO products(seller_id,commodity,market,price_rwf,unit,
-           quantity_kg,status,created_at,updated_at)
-           VALUES(?,?,?,?,?,?,?,?,?)"""),
-        (current_user["user_id"], req.commodity, req.market, req.price_rwf,
-         req.unit, req.quantity_kg, "active", now, now)
-    )
-    product_id = cursor.lastrowid
-    conn.commit()
-    product = conn.execute(q("SELECT * FROM products WHERE id=?"), (product_id,)).fetchone()
+    if USE_POSTGRES:
+        product = conn.execute(
+            """INSERT INTO products(seller_id,commodity,market,price_rwf,unit,
+               quantity_kg,status,created_at,updated_at)
+               VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               RETURNING *""",
+            (current_user["user_id"], req.commodity, req.market, req.price_rwf,
+             req.unit, req.quantity_kg, "active", now, now)
+        ).fetchone()
+        conn.commit()
+    else:
+        cursor = conn.execute(
+            """INSERT INTO products(seller_id,commodity,market,price_rwf,unit,
+               quantity_kg,status,created_at,updated_at)
+               VALUES(?,?,?,?,?,?,?,?,?)""",
+            (current_user["user_id"], req.commodity, req.market, req.price_rwf,
+             req.unit, req.quantity_kg, "active", now, now)
+        )
+        product_id = cursor.lastrowid
+        conn.commit()
+        product = conn.execute(
+            "SELECT * FROM products WHERE id=?", (product_id,)
+        ).fetchone()
     conn.close()
     return dict(product)
 
@@ -635,11 +662,7 @@ def update_product(product_id: int, req: ProductUpdate,
         updates.append("status=?"); values.append(req.status)
     updates.append("updated_at=?"); values.append(datetime.utcnow().isoformat())
     values.append(product_id)
-    if USE_POSTGRES:
-        update_sql = f"UPDATE products SET {','.join(u.replace('=?','=%s') for u in updates)} WHERE id=%s"
-    else:
-        update_sql = f"UPDATE products SET {','.join(updates)} WHERE id=?"
-    conn.execute(update_sql, values)
+    conn.execute(q(f"UPDATE products SET {','.join(updates)} WHERE id=?"), values)
     if price_changed:
         now = datetime.utcnow().isoformat()
         conn.execute(
