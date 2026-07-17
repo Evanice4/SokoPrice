@@ -501,49 +501,32 @@ def list_conversations(current_user: dict = Depends(get_current_user)):
     uid = current_user["user_id"]
 
     if USE_POSTGRES:
-        rows = conn.execute(
-            """
-            SELECT DISTINCT ON (partner_id)
-                CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END as partner_id,
-                u.name as partner_name,
-                u.role as partner_role,
-                created_at as last_time,
-                message as last_message,
-                (SELECT COUNT(*) FROM messages m2
-                 WHERE m2.receiver_id = %s
-                 AND m2.sender_id = CASE WHEN m.sender_id = %s THEN m.receiver_id ELSE m.sender_id END
-                 AND m2.read = 0) as unread
-            FROM messages m
-            JOIN users u ON u.id = CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END
-            WHERE sender_id = %s OR receiver_id = %s
-            ORDER BY partner_id, created_at DESC
-            """,
-            (uid, uid, uid, uid, uid, uid)
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            """
+    rows = conn.execute(
+        """
+        WITH conversation_partners AS (
             SELECT
-                CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as partner_id,
-                u.name as partner_name,
-                u.role as partner_role,
-                MAX(created_at) as last_time,
-                (SELECT message FROM messages m2
-                 WHERE (m2.sender_id=m.sender_id AND m2.receiver_id=m.receiver_id)
-                    OR (m2.sender_id=m.receiver_id AND m2.receiver_id=m.sender_id)
-                 ORDER BY m2.created_at DESC LIMIT 1) as last_message,
-                SUM(CASE WHEN sender_id != ? AND read=0 THEN 1 ELSE 0 END) as unread
-            FROM messages m
-            JOIN users u ON u.id = CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END
-            WHERE sender_id = ? OR receiver_id = ?
-            GROUP BY partner_id
-            ORDER BY last_time DESC
-            """,
-            (uid, uid, uid, uid, uid)
-        ).fetchall()
-
-    conn.close()
-    return {"conversations": [dict(r) for r in rows]}
+                CASE WHEN sender_id = %s THEN receiver_id ELSE sender_id END as partner_id,
+                created_at,
+                message
+            FROM messages
+            WHERE sender_id = %s OR receiver_id = %s
+        )
+        SELECT DISTINCT ON (cp.partner_id)
+            cp.partner_id,
+            u.name as partner_name,
+            u.role as partner_role,
+            cp.created_at as last_time,
+            cp.message as last_message,
+            (SELECT COUNT(*) FROM messages m2
+             WHERE m2.sender_id = cp.partner_id
+             AND m2.receiver_id = %s
+             AND m2.read = 0) as unread
+        FROM conversation_partners cp
+        JOIN users u ON u.id = cp.partner_id
+        ORDER BY cp.partner_id, cp.created_at DESC
+        """,
+        (uid, uid, uid, uid)
+    ).fetchall()
 
 
 @app.get("/messages/{partner_id}", tags=["Messages"])
