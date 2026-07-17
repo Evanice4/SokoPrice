@@ -15,10 +15,39 @@ def get_db():
     if USE_POSTGRES:
         import psycopg2
         import psycopg2.extras
+
         conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = False
-        conn.cursor_factory = psycopg2.extras.RealDictCursor
-        return conn
+
+        class PGWrapper:
+            def __init__(self, conn):
+                self._conn = conn
+                self._cur = conn.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                )
+
+            def execute(self, query, params=None):
+                self._cur.execute(query, params or ())
+                return self._cur
+
+            def fetchone(self):
+                return self._cur.fetchone()
+
+            def fetchall(self):
+                return self._cur.fetchall()
+
+            def commit(self):
+                self._conn.commit()
+
+            def close(self):
+                self._cur.close()
+                self._conn.close()
+
+            @property
+            def lastrowid(self):
+                return self._cur.fetchone()
+
+        return PGWrapper(conn)
     else:
         import sqlite3
         DB_PATH = os.path.join(

@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from database import init_db, get_db
+from database import init_db, get_db, q
 from auth import (hash_password, verify_password, create_token,
                   get_current_user, require_admin, require_seller)
 
