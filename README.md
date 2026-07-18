@@ -81,7 +81,7 @@ Firebase Hosting
 React / Vite Frontend
     | API calls
 Render Backend
-FastAPI + JWT Auth + SQLite + XGBoost Model
+FastAPI + JWT Auth + PostgreSQL + XGBoost Model
     |
 Best_model/model_xgb_tuned.pkl
 encoders/le_commodity.pkl
@@ -96,7 +96,7 @@ encoders/le_market.pkl
 |---|---|
 | Backend | FastAPI, Python, Uvicorn |
 | ML Model | XGBoost, scikit-learn, joblib |
-| Database | SQLite WAL mode |
+| Database | PostgreSQL (production), SQLite (local development) |
 | Auth | JWT tokens, SHA-256 password hashing |
 | Frontend | React 18, Vite |
 | Charts | Recharts |
@@ -153,7 +153,7 @@ Results averaged across all 18 rolling window folds. Primary metric is MAPE. All
 | Ridge Regression | 55.94 | 77.59 | 0.894 | 10.43 | 92.84 |
 | Random Forest | 62.98 | 89.98 | 0.839 | 11.69 | 91.17 |
 
-**Best model: XGBoost (tuned)** — MAPE 8.75%, MAE 45.90 RWF, Directional Accuracy 92.81%.
+**Best model: XGBoost (tuned)** - MAPE 8.75%, MAE 45.90 RWF, Directional Accuracy 92.81%.
 
 XGBoost narrowly outperforms Linear Regression on MAPE (8.75% vs 8.78%) and is the model wired into `main.py`. Linear Regression has a slightly higher R2 (0.921 vs 0.886), suggesting the lag and rolling features capture most of the temporal signal linearly. All five models achieve directional accuracy above 91%, correctly predicting whether prices go up or down more than 9 times out of 10.
 
@@ -230,9 +230,9 @@ curl -X POST https://sokoprice.onrender.com/admin/retrain \
 |---|---|---|---|
 | POST | `/messages/send` | Send a message | User |
 | GET | `/messages/conversations` | List conversations | User |
+| GET | `/messages/unread-count` | Unread message count | User |
 | GET | `/messages/{partner_id}` | Get conversation | User |
 | POST | `/messages/{id}/read` | Mark as read | User |
-| GET | `/messages/unread-count` | Unread message count | User |
 
 ### Admin
 
@@ -286,15 +286,13 @@ App at `http://localhost:5173`
 
 ### 5. Create frontend environment file
 
-```
-frontend/.env
-```
+Create a file at `frontend/.env` with this content:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-For deployed backend:
+For the deployed backend:
 
 ```env
 VITE_API_URL=https://sokoprice.onrender.com
@@ -308,17 +306,39 @@ Go to `http://localhost:5173/#admin` while logged in as admin.
 
 ## Testing
 
-### Backend testing
+Three levels of testing were performed: unit testing, integration testing, and system testing.
 
-Tested at `https://sokoprice.onrender.com/docs`. Confirmed API running, model loaded, XGBoost active, and all endpoints responding with RWF predictions.
+### Unit Testing
 
-### Frontend testing
+Unit tests verify individual functions in isolation including auth utilities, feature engineering, prediction logic, basket calculations, and validation. Tests are in `test_unit.py`.
 
-Tested at `https://soko-price-forecasting.web.app`. Confirmed home page, price forecasting, market comparison, cost estimator, seller listings, admin dashboard, and mobile responsiveness all working correctly.
+```bash
+python -m pytest test_unit.py -v
+```
 
-### Mobile testing
+**Results: 26 passed, 1 skipped**
 
-#### Android
+The skipped test requires the model file to be present locally. All other tests pass.
+
+![Unit test results](assets/testing/unit%20test.PNG)
+
+### Integration Testing
+
+Integration tests verify all API endpoints end to end using FastAPI's test client. Tests cover health check, catalog, auth, forecasting, recommendations, basket, alerts, seller management, and admin endpoints. Tests are in `test_integration.py`.
+
+```bash
+python -m pytest test_integration.py -v
+```
+
+**Results: 46 passed, 0 failed**
+
+![Integration test results](assets/testing/integration%20test.PNG)
+
+### System Testing
+
+System testing validates the full application from the user's perspective across all features, roles, and devices. Full test cases are documented in `assets/testing/test_system.md`.
+
+#### Android Testing
 
 Market maps, seller listings, market cards, and navigation render correctly on a mobile browser.
 
@@ -326,32 +346,26 @@ Market maps, seller listings, market cards, and navigation render correctly on a
 
 ![Android testing 2](assets/test%20android%202.jpeg)
 
-#### iOS - Cost Estimator
+#### iOS Testing - Cost Estimator
 
 Basket total, cost breakdown chart, commodity colour legend, and recalculate button display correctly on a mobile browser.
 
 ![iOS cost estimator testing](assets/test%20ios.jpeg)
 
-#### iOS - Price Forecast
+#### iOS Testing - Price Forecast
 
 Forecast results, confidence range, best market recommendation, and market comparison table display correctly on a mobile browser.
 
 ![iOS price forecast testing](assets/test%20ios%202.jpeg)
 
-### Test summary
+### Test Summary
 
-| Test Area | Result |
-|---|---|
-| Backend deployment on Render | Passed |
-| Model loading and predictions | Passed |
-| Firebase frontend deployment | Passed |
-| Price forecasting | Passed |
-| Market comparison | Passed |
-| Cost estimator with budget | Passed |
-| Seller listings and CRUD | Passed |
-| Admin dashboard | Passed |
-| Android mobile display | Passed |
-| iOS mobile display | Passed |
+| Test Type | Tests | Passed | Failed |
+|---|---|---|---|
+| Unit tests | 27 | 26 | 0 (1 skipped) |
+| Integration tests | 46 | 46 | 0 |
+| System tests | 94 | 94 | 0 |
+| **Total** | **167** | **166** | **0** |
 
 ---
 
@@ -366,6 +380,7 @@ Forecast results, confidence range, best market recommendation, and market compa
 | Model predicting negative or very large values | XGBoost trained on unscaled y_train but prediction applied scaler_y inverse transform | Removed scaler_y from inference pipeline |
 | Database resetting on every restart | SQLite path resolved relative to working directory | Set absolute path using os.path.abspath in database.py |
 | Users losing login after browser refresh | JWT payload lacks name field, re-parsing token lost user object | Store full user object in localStorage as sp_user |
+| PostgreSQL queries failing on Render | SQLite uses ? placeholders, PostgreSQL uses %s | Added q() helper function to convert placeholders at runtime |
 | LSTM and GRU MAPE above 2700% | Scaler mismatch on inverse transform for sequence predictions | Excluded from production, documented as known issue |
 | Free Render instance delay | Free Render services sleep after 15 minutes of inactivity | First request after inactivity takes 30 to 60 seconds then resumes normally |
 
@@ -381,7 +396,11 @@ Seasonal patterns learned from Kenya data may not transfer directly to Kigali. S
 
 Real Kigali price data should be collected from the five markets at regular intervals recording commodity, market, price, and date consistently.
 
-Other planned improvements include moving database persistence to PostgreSQL or Firestore, improving real-time chat using WebSockets or Firebase Realtime Database, adding automated CI/CD from GitHub, and adding model version tracking alongside retraining workflows.
+Other planned improvements include migrating chat to Firebase Realtime Database for true real-time bidirectional messaging, adding automated CI/CD from GitHub, and adding model version tracking alongside retraining workflows.
+
+A future version will include proactive price alerts that notify users automatically when predicted prices spike above historical averages, without requiring a manual threshold entry. 
+
+The system will also incorporate a nutrition-aware shopping assistant chatbot that recommends the most nutritious commodity options available at the cheapest market, helping households make food choices that balance both cost and nutritional value.
 
 ---
 
@@ -393,7 +412,10 @@ SokoPrice/
 ├── database.py
 ├── auth.py
 ├── requirements.txt
-├── sokoprice.db
+├── pytest.ini
+├── conftest.py
+├── test_unit.py
+├── test_integration.py
 ├── Best_model/
 │   └── model_xgb_tuned.pkl
 ├── encoders/
@@ -403,18 +425,21 @@ SokoPrice/
 │   └── wfp_food_prices_ken.csv
 ├── notebook/
 │   └── SokoPrice_V2_Notebook.ipynb
-├── Visualizations/
+├── visualizations/
 │   └── (viz1 to viz17 png files)
-├── sample_data/
+├── sample-data/
 │   ├── kigali_prices_2024.csv
 │   ├── kigali_prices_2025.csv
 │   └── kigali_prices_2026.csv
 ├── assets/
+│   ├── test android.jpeg
+│   ├── test android 2.jpeg
+│   ├── test ios.jpeg
+│   ├── test ios 2.jpeg
 │   └── testing/
-│       ├── android_market_seller_testing.jpeg
-│       ├── android_market_seller_testing_2.jpeg
-│       ├── ios_cost_estimator_testing.jpeg
-│       └── ios_price_forecast_testing.jpeg
+│       ├── test_system.md
+│       ├── unit test.PNG
+│       └── integration test.PNG
 ├── frontend/
 │   ├── src/
 │   │   ├── main.jsx
@@ -425,4 +450,5 @@ SokoPrice/
 ├── firebase.json
 └── .firebaserc
 ```
-**Author:** Nice Eva Karabaranga 
+
+**Author:** Nice Eva Karabaranga | July 2026
