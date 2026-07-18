@@ -715,6 +715,7 @@ function Alerts(){
   const[result,setResult]=useState(null);
   const[allAlerts,setAllAlerts]=useState([]);
   const[loading,setLoading]=useState(false);
+  const[autoLoading,setAutoLoading]=useState(false);
 
   const check=async()=>{
     setLoading(true);
@@ -722,16 +723,26 @@ function Alerts(){
     setResult(d);setLoading(false);
   };
 
-  // Auto-check alerts for all commodities at default thresholds
+  // All commodities across all 5 markets against historical averages
+  const HISTORICAL_AVERAGES={
+    'Maize':520,'Maize Flour':3850,'Potatoes':1450,'Rice':12500,
+    'Beans (Dry)':3100,'Sorghum':600,'Bananas':3100,
+    'Spinach':800,'Cabbage':2200,'Flour':3800
+  };
+
   const loadAllAlerts=async()=>{
-    const defaults={'Maize':600,'Beans (Dry)':1500,'Rice':1200,'Potatoes':800,'Maize Flour':500};
+    setAutoLoading(true);
     const results=await Promise.all(
-      Object.entries(defaults).map(async([c,t])=>{
-        const d=await get(`/alerts/${c}?threshold_kes=${t}&market=Kimironko`);
-        return d?{...d,threshold_kes:t}:null;
+      COMMODITIES.map(async c=>{
+        const historical=HISTORICAL_AVERAGES[c]||1000;
+        // Use 115% of historical average as spike threshold
+        const spike_threshold=Math.round(historical*1.15);
+        const d=await get(`/alerts/${c}?threshold_kes=${spike_threshold}&market=Kimironko`);
+        return d?{...d,threshold_kes:spike_threshold,historical,spike_pct:Math.round(((d.predicted_price_kes-historical)/historical)*100)}:null;
       })
     );
-    setAllAlerts(results.filter(Boolean));
+    setAllAlerts(results.filter(Boolean).sort((a,b)=>b.spike_pct-a.spike_pct));
+    setAutoLoading(false);
   };
 
   useEffect(()=>{check();loadAllAlerts();},[]);
@@ -741,7 +752,7 @@ function Alerts(){
     <main>
       <section style={{padding:'32px 0 24px'}}>
         <h1>Price <span style={{color:'#087a3a'}}>Alerts</span></h1>
-        <p style={{color:'#344054',fontSize:15}}>AI-predicted alerts based on current forecasts and your budget thresholds.</p>
+        <p style={{color:'#344054',fontSize:15}}>AI-predicted alerts based on current forecasts and historical price averages.</p>
       </section>
       <div className="grid2" style={{gap:24,gridTemplateColumns:'1fr 1.2fr'}}>
         <div style={{display:'grid',gap:16,alignContent:'start'}}>
@@ -751,7 +762,9 @@ function Alerts(){
               <Sel label="Commodity" value={commodity} onChange={setCommodity} items={COMMODITIES}/>
               <Sel label="Market" value={market} onChange={setMarket} items={MARKETS}/>
               <Inp label="Budget Threshold (RWF/kg)" type="number" value={threshold} onChange={setThreshold}/>
-              <button className="orange" onClick={check} disabled={loading} style={{padding:'13px 0'}}><Bell size={16}/> {loading?'Checking...':'Check Alert'}</button>
+              <button className="orange" onClick={check} disabled={loading} style={{padding:'13px 0'}}>
+                <Bell size={16}/> {loading?'Checking...':'Check Alert'}
+              </button>
             </div>
           </Card>
           {result&&(
@@ -759,33 +772,49 @@ function Alerts(){
               <div style={{fontWeight:700,fontSize:17,color:result.alert?'#d92d20':'#087a3a'}}>{result.alert?'Price Alert Active':'Within Budget'}</div>
               <div style={{fontSize:30,fontWeight:800,margin:'10px 0',color:result.alert?'#d92d20':'#087a3a'}}>{money(result.predicted_price_kes)} RWF/kg</div>
               <div style={{fontSize:13,color:'#344054'}}>{result.message}</div>
-              <div style={{display:'flex',gap:10,marginTop:12}}><Badge color={result.alert?'#d92d20':'#087a3a'}>{result.alert?'Over Threshold':'Within Budget'}</Badge><TrendBadge trend={result.trend}/></div>
+              <div style={{display:'flex',gap:10,marginTop:12}}>
+                <Badge color={result.alert?'#d92d20':'#087a3a'}>{result.alert?'Over Threshold':'Within Budget'}</Badge>
+                <TrendBadge trend={result.trend}/>
+              </div>
             </Card>
           )}
         </div>
+
         <Card>
-          <h3 style={{marginTop:0}}>Live Price Watch</h3>
-          <p style={{fontSize:13,color:'#667085',marginBottom:16}}>AI-predicted alerts based on current forecasts at Kimironko. Updated each time you visit.</p>
-          <table>
-            <tbody>
-              <tr><th>Commodity</th><th>Predicted Price</th><th>Threshold</th><th>Trend</th><th>Status</th></tr>
-              {allAlerts.map((a,i)=>(
-                <tr key={i}>
-                  <td style={{fontWeight:600}}>{a.commodity}</td>
-                  <td style={{fontWeight:700,color:a.alert?'#d92d20':'#087a3a'}}>{money(a.predicted_price_kes)} RWF</td>
-                  <td>{money(a.threshold_kes)} RWF</td>
-                  <td><TrendBadge trend={a.trend}/></td>
-                  <td><Badge color={a.alert?'#d92d20':'#087a3a'}>{a.alert?'Alert':'OK'}</Badge></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <h3 style={{margin:0}}>Live Price Watch</h3>
+            <button onClick={loadAllAlerts} disabled={autoLoading}
+              style={{background:'#f4fbf6',border:'1px solid #c3e6cb',borderRadius:8,padding:'6px 12px',cursor:'pointer',color:'#087a3a',fontSize:12,fontWeight:600}}>
+              {autoLoading?'Refreshing...':'Refresh'}
+            </button>
+          </div>
+          <p style={{fontSize:13,color:'#667085',marginBottom:16}}>
+            Automatically flags all commodities trading above 15% of their historical average. No threshold entry needed.
+          </p>
+          {autoLoading?<Spinner/>:(
+            <table>
+              <tbody>
+                <tr><th>Commodity</th><th>Predicted</th><th>Historical Avg</th><th>Change</th><th>Trend</th><th>Status</th></tr>
+                {allAlerts.map((a,i)=>(
+                  <tr key={i} style={{background:a.alert?'#fff5f5':''}}>
+                    <td style={{fontWeight:600}}>{a.commodity}</td>
+                    <td style={{fontWeight:700,color:a.alert?'#d92d20':'#087a3a'}}>{money(a.predicted_price_kes)} RWF</td>
+                    <td style={{color:'#667085'}}>{money(a.historical)} RWF</td>
+                    <td style={{fontWeight:600,color:a.spike_pct>0?'#d92d20':'#087a3a'}}>
+                      {a.spike_pct>0?'+':''}{a.spike_pct}%
+                    </td>
+                    <td><TrendBadge trend={a.trend}/></td>
+                    <td><Badge color={a.alert?'#d92d20':'#087a3a'}>{a.alert?'Spike':'Normal'}</Badge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </Card>
       </div>
     </main>
   );
 }
-
 // Sellers - full CRUD with real-time chart
 function Sellers(){
   const{get,post,put,del}=useApi();const{user}=useAuth();
