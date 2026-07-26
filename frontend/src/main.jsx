@@ -4,7 +4,7 @@ import{Bell,CheckCircle,Eye,EyeOff,LineChart,LogIn,LogOut,MapPin,Pencil,Plus,Shi
 import sokopriceLogo from '../../images/sokopricelogo.png';
 import{Bar,BarChart,Cell,Line,LineChart as RLineChart,Pie,PieChart,ResponsiveContainer,Tooltip,XAxis,YAxis}from'recharts';
 import'./styles.css';
-
+import EulaModal from './components/EulaModal.jsx';
 const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const MARKETS=['Kimironko','Nyabugogo','Kicukiro','Kimisagara','Kigali City'];
 const COMMODITIES=['Maize','Maize Flour','Potatoes','Rice','Beans (Dry)','Sorghum','Bananas','Spinach','Cabbage','Flour'];
@@ -237,53 +237,282 @@ function Login({setPage}){
 }
 
 // Register
-function Register({setPage}){
-  const{post}=useApi();const{setUser}=useAuth();
-  const[form,setForm]=useState({name:'',email:'',password:'',role:'consumer',market:'Kimironko'});
-  const[loading,setLoading]=useState(false);const[err,setErr]=useState('');
-  const set=k=>v=>setForm(f=>({...f,[k]:v}));
-  const submit=async()=>{
-    if(!form.name||!form.email||!form.password){setErr('Please fill in all fields');return;}
-    setLoading(true);setErr('');
-    const r=await post('/auth/register',form);
-    setLoading(false);
-    if(!r){setErr('Registration failed. Email may already be in use.');return;}
-    localStorage.setItem('sp_token',r.token);localStorage.setItem('sp_user',JSON.stringify(r.user));
-    localStorage.setItem('sp_creds',btoa(form.email+':'+form.password));setUser(r.user);
-    setPage(r.user.role==='seller'?'Sellers':'Home');
+function Register({ setPage }) {
+  const { post } = useApi();
+  const { setUser } = useAuth();
+
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'consumer',
+    market: 'Kimironko',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+  const [showEula, setShowEula] = useState(false);
+  const [acceptedEula, setAcceptedEula] = useState(false);
+
+  const set = (key) => (value) =>
+    setForm((currentForm) => ({
+      ...currentForm,
+      [key]: value,
+    }));
+
+  const openEula = () => {
+    setErr('');
+
+    if (
+      !form.name.trim() ||
+      !form.email.trim() ||
+      !form.password
+    ) {
+      setErr('Please fill in all fields');
+      return;
+    }
+
+    setAcceptedEula(false);
+    setShowEula(true);
   };
-  return(
-    <div style={{minHeight:'85vh',display:'grid',placeItems:'center',background:'linear-gradient(135deg,#f4fbf6,#e8f5ec)'}}>
-      <div className="auth-card" style={{maxWidth:480,width:'100%',background:'white',borderRadius:24,padding:44,boxShadow:'0 24px 64px rgba(0,0,0,.09)'}}>
-        <div style={{textAlign:'center',marginBottom:32}}>
-          <h2 style={{margin:'0 0 8px'}}>Create your account</h2>
-          <p style={{color:'#667085',margin:0,fontSize:14}}>Join SokoPrice and shop smarter</p>
-        </div>
-        {err&&<div style={{background:'#fff5f5',border:'1px solid #fca5a5',borderRadius:10,padding:12,marginBottom:16,color:'#d92d20',fontSize:13}}>{err}</div>}
-        <div style={{display:'grid',gap:14}}>
-          <Inp label="Full name" value={form.name} onChange={set('name')} placeholder="Grace Uwase"/>
-          <Inp label="Email" type="email" value={form.email} onChange={set('email')} placeholder="you@example.com"/>
-          <Inp label="Password" type="password" value={form.password} onChange={set('password')} placeholder="Create a password"/>
-          <div>
-            <span style={{fontWeight:700,fontSize:13,display:'block',marginBottom:8}}>I am a</span>
-            <div className="rg2" style={{gap:10}}>
-              {['consumer','seller'].map(r=>(
-                <button key={r} onClick={()=>set('role')(r)}
-                  style={{padding:'12px 16px',borderRadius:10,border:`2px solid ${form.role===r?'#087a3a':'#e5e9ef'}`,background:form.role===r?'#f4fbf6':'white',color:form.role===r?'#087a3a':'#344054',fontWeight:600,cursor:'pointer',textTransform:'capitalize',transition:'all .15s'}}>
-                  {r==='consumer'?'Consumer':'Seller'}
-                </button>
-              ))}
-            </div>
+
+  const closeEula = () => {
+    if (loading) return;
+
+    setShowEula(false);
+    setAcceptedEula(false);
+  };
+
+  const createAccount = async () => {
+    if (!acceptedEula || loading) return;
+
+    setLoading(true);
+    setErr('');
+
+    const result = await post('/auth/register', form);
+
+    setLoading(false);
+
+    if (!result) {
+      setShowEula(false);
+      setAcceptedEula(false);
+      setErr(
+        'Registration failed. Email may already be in use.'
+      );
+      return;
+    }
+
+    localStorage.setItem('sp_token', result.token);
+    localStorage.setItem(
+      'sp_user',
+      JSON.stringify(result.user)
+    );
+
+    setUser(result.user);
+    setShowEula(false);
+
+    setPage(
+      result.user.role === 'seller'
+        ? 'Sellers'
+        : 'Home'
+    );
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          minHeight: '85vh',
+          display: 'grid',
+          placeItems: 'center',
+          background:
+            'linear-gradient(135deg,#f4fbf6,#e8f5ec)',
+        }}
+      >
+        <div
+          className="auth-card"
+          style={{
+            maxWidth: 480,
+            width: '100%',
+            background: 'white',
+            borderRadius: 24,
+            padding: 44,
+            boxShadow: '0 24px 64px rgba(0,0,0,.09)',
+          }}
+        >
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: 32,
+            }}
+          >
+            <h2 style={{ margin: '0 0 8px' }}>
+              Create your account
+            </h2>
+
+            <p
+              style={{
+                color: '#667085',
+                margin: 0,
+                fontSize: 14,
+              }}
+            >
+              Join SokoPrice and shop smarter
+            </p>
           </div>
-          {form.role==='seller'&&<Sel label="Your market" value={form.market} onChange={set('market')} items={MARKETS}/>}
-        </div>
-        <button className="primary" style={{width:'100%',marginTop:24,padding:'14px 0',fontSize:15}} onClick={submit} disabled={loading}>{loading?'Creating account...':'Create Account'}</button>
-        <div style={{textAlign:'center',marginTop:18,fontSize:14}}>
-          <span style={{color:'#667085'}}>Already have an account? </span>
-          <button onClick={()=>setPage('Login')} style={{background:'none',border:'none',color:'#087a3a',fontWeight:700,cursor:'pointer',fontSize:14}}>Sign In</button>
+
+          {err && (
+            <div
+              style={{
+                background: '#fff5f5',
+                border: '1px solid #fca5a5',
+                borderRadius: 10,
+                padding: 12,
+                marginBottom: 16,
+                color: '#d92d20',
+                fontSize: 13,
+              }}
+            >
+              {err}
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gap: 14 }}>
+            <Inp
+              label="Full name"
+              value={form.name}
+              onChange={set('name')}
+              placeholder="Grace Uwase"
+            />
+
+            <Inp
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={set('email')}
+              placeholder="you@example.com"
+            />
+
+            <Inp
+              label="Password"
+              type="password"
+              value={form.password}
+              onChange={set('password')}
+              placeholder="Create a password"
+            />
+
+            <div>
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontSize: 13,
+                  display: 'block',
+                  marginBottom: 8,
+                }}
+              >
+                I am a
+              </span>
+
+              <div className="rg2" style={{ gap: 10 }}>
+                {['consumer', 'seller'].map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => set('role')(role)}
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: 10,
+                      border: `2px solid ${
+                        form.role === role
+                          ? '#087a3a'
+                          : '#e5e9ef'
+                      }`,
+                      background:
+                        form.role === role
+                          ? '#f4fbf6'
+                          : 'white',
+                      color:
+                        form.role === role
+                          ? '#087a3a'
+                          : '#344054',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                      transition: 'all .15s',
+                    }}
+                  >
+                    {role === 'consumer'
+                      ? 'Consumer'
+                      : 'Seller'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {form.role === 'seller' && (
+              <Sel
+                label="Your market"
+                value={form.market}
+                onChange={set('market')}
+                items={MARKETS}
+              />
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="primary"
+            style={{
+              width: '100%',
+              marginTop: 24,
+              padding: '14px 0',
+              fontSize: 15,
+            }}
+            onClick={openEula}
+            disabled={loading}
+          >
+            Create Account
+          </button>
+
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: 18,
+              fontSize: 14,
+            }}
+          >
+            <span style={{ color: '#667085' }}>
+              Already have an account?{' '}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setPage('Login')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#087a3a',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: 14,
+              }}
+            >
+              Sign In
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showEula && (
+        <EulaModal
+          accepted={acceptedEula}
+          setAccepted={setAcceptedEula}
+          onClose={closeEula}
+          onConfirm={createAccount}
+          loading={loading}
+        />
+      )}
+    </>
   );
 }
 

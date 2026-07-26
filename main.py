@@ -334,6 +334,9 @@ def root():
         "price_unit"   : "RWF",
     }
 
+@app.head("/", tags=["Health"])
+def root_head():
+    return {}
 
 @app.get("/commodities", tags=["Catalog"])
 def list_commodities():
